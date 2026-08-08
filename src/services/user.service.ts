@@ -1,18 +1,28 @@
 /**
  * user.service.ts
  *
- * Placeholder for the user service.
+ * Service layer for User domain operations.
+ * All Prisma calls for users are isolated here.
  *
- * This file will be fully implemented in the Authentication milestone when the
- * User model is added to the Prisma schema and NextAuth (or equivalent) is
- * integrated. Functions will include:
- *
- *   getUserById(id: string): Promise<User | null>
- *   getUserByEmail(email: string): Promise<User | null>
- *   createUser(data: CreateUserInput): Promise<User>
- *
- * No-op for now — exported so that import paths are established
- * and remain stable when the milestone lands.
+ * Architecture: Page → Service → Prisma
  */
 
-export {};
+import { prisma } from "@/lib/prisma";
+
+export async function getUserById(id: string) {
+  return prisma.user.findUnique({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+}
+
+export async function getUserByEmail(email: string) {
+  return prisma.user.findUnique({
+    where: {
+      email,
+      deletedAt: null,
+    },
+  });
+}

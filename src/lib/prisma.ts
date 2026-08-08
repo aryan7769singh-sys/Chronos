@@ -8,10 +8,10 @@
  * hot-reload from creating new pools on every module evaluation.
  */
 
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+
 
 type GlobalWithPrisma = typeof globalThis & {
   prismaPool: Pool | undefined;

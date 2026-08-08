@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 // ---------------------------------------------------------------------------
 // Enums
 // PostgreSQL enum labels are stored as-is. Prisma identifiers use underscore
@@ -46,14 +45,67 @@ enum TaskStatus {
 }
 
 // ---------------------------------------------------------------------------
-// Models
+// Auth.js Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  projects      Project[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Domain Models
 // ---------------------------------------------------------------------------
 
 /// A top-level container for a body of related work.
-/// The userId column is intentionally absent until the authentication milestone
-/// adds the User model and the corresponding foreign key via a migration.
+/// Every project is strictly owned by a User.
 model Project {
   id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   description String        @default("")
   /// One of the ProjectColor union values ("violet" | "blue" | ...)

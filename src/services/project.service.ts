@@ -164,10 +164,14 @@ function mapProject(raw: PrismaProject): Project {
 
 /**
  * Returns all non-deleted projects with computed progress and health.
+ * Scoped to userId when provided.
  */
-export async function getAllProjects(): Promise<Project[]> {
+export async function getAllProjects(userId?: string): Promise<Project[]> {
   const projects = await prisma.project.findMany({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+      ...(userId ? { userId } : {}),
+    },
     include: {
       tasks: {
         where: { deletedAt: null },
@@ -184,11 +188,18 @@ export async function getAllProjects(): Promise<Project[]> {
 
 /**
  * Returns a single non-deleted project with computed progress and health.
- * Returns null if not found or soft-deleted.
+ * Scoped to userId when provided. Returns null if not found or soft-deleted.
  */
-export async function getProjectById(id: string): Promise<Project | null> {
+export async function getProjectById(
+  id: string,
+  userId?: string
+): Promise<Project | null> {
   const project = await prisma.project.findFirst({
-    where: { id, deletedAt: null },
+    where: {
+      id,
+      deletedAt: null,
+      ...(userId ? { userId } : {}),
+    },
     include: {
       tasks: {
         where: { deletedAt: null },
@@ -202,3 +213,4 @@ export async function getProjectById(id: string): Promise<Project | null> {
   if (!project) return null;
   return mapProject(project);
 }
+

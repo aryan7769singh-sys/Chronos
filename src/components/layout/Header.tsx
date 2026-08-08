@@ -10,9 +10,10 @@ import {
   Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
+
 
 // ---------------------------------------------------------------------------
 // Types
@@ -143,17 +144,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Bell className="size-4" />
         </Button>
 
-        {/* User avatar */}
-        <Avatar
-          id="header-user-avatar"
-          size="sm"
-          className="ml-1 cursor-pointer"
-          aria-label="User menu"
-        >
-          <AvatarFallback className="text-xs font-semibold">
-            U
-          </AvatarFallback>
-        </Avatar>
+        {/* User menu with avatar & sign out */}
+        <UserMenu />
       </div>
     </header>
   );

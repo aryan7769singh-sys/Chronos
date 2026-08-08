@@ -41,6 +41,19 @@ function daysFromNow(n: number): Date {
 async function main() {
   console.log("🌱 Seeding Chronos database…");
 
+  // --- Development User ---------------------------------------------------
+
+  await prisma.user.upsert({
+    where: { id: "user-dev-1" },
+    update: {},
+    create: {
+      id: "user-dev-1",
+      name: "Alex Rivera",
+      email: "alex.rivera@example.com",
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=128&h=128&fit=crop&crop=faces",
+    },
+  });
+
   // --- Projects -----------------------------------------------------------
 
   await prisma.project.upsert({
@@ -48,6 +61,7 @@ async function main() {
     update: {},
     create: {
       id: "proj-1",
+      userId: "user-dev-1",
       name: "Chronos App",
       description:
         "A personal productivity OS with tasks, habits, focus timers, analytics, and AI-powered insights.",
@@ -65,6 +79,7 @@ async function main() {
     update: {},
     create: {
       id: "proj-2",
+      userId: "user-dev-1",
       name: "Portfolio Website",
       description:
         "Personal portfolio showcasing projects, skills, writing, and open source contributions.",
@@ -82,6 +97,7 @@ async function main() {
     update: {},
     create: {
       id: "proj-3",
+      userId: "user-dev-1",
       name: "API Client Library",
       description:
         "Typed HTTP client library with middleware support, rate limiting, retries, and auto-generated docs.",
@@ -99,6 +115,7 @@ async function main() {
     update: {},
     create: {
       id: "proj-4",
+      userId: "user-dev-1",
       name: "Team Dashboard",
       description:
         "Internal analytics dashboard for tracking team velocity, sprint health, and deployment metrics.",

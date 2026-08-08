@@ -5,6 +5,32 @@ Format: `## [version] - YYYY-MM-DD`
 
 ---
 
+## [0.5.0] - 2026-08-08
+
+### Milestone 5: Authentication
+
+Implements full authentication, session management, and route protection using **Auth.js (NextAuth v5)** with Neon PostgreSQL.
+
+#### Added
+- `src/lib/auth.config.ts` — Edge-compatible Auth.js configuration for JWT sessions and providers
+- `src/lib/auth.ts` — Node.js Auth.js configuration with `@auth/prisma-adapter` and exported auth helpers
+- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth GET/POST API route handler
+- `src/middleware.ts` — Route protection middleware guarding all app routes and API routes
+- `src/app/login/page.tsx` — Minimal, calm command-center login page with Google OAuth and demo account sign-in
+- `src/components/auth/UserMenu.tsx` — Header dropdown with dynamic user avatar, initials fallback, email, and Sign Out action
+- `src/types/next-auth.d.ts` — TypeScript type augmentation for `Session` and `JWT` interfaces
+- `User`, `Account`, `Session`, and `VerificationToken` models in Prisma schema
+
+#### Modified
+- `prisma/schema.prisma` — Added Auth.js models and non-nullable `Project.userId` foreign key
+- `prisma/seed.ts` — Added development user (`user-dev-1`) and linked all seeded projects
+- `src/services/user.service.ts` — Implemented `getUserById` and `getUserByEmail`
+- `src/services/project.service.ts` — Added `userId` scoping to `getAllProjects` and `getProjectById`
+- `src/components/layout/Header.tsx` — Replaced placeholder avatar with `UserMenu`
+- `src/app/(app)/projects/page.tsx`, `projects/[projectId]/page.tsx`, `projects/[projectId]/[taskId]/page.tsx` — Connected authenticated session to service calls
+
+---
+
 ## [0.4.0] - 2026-08-08
 
 ### Milestone 4: Database & Persistence

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { getProjectById } from "@/services/project.service";
 import { getTaskById, getSubtasksByTaskId } from "@/services/task.service";
 import { TaskDetails } from "@/features/tasks/components/tasks/TaskDetails";
@@ -17,9 +18,10 @@ export async function generateMetadata({ params }: TaskPageProps) {
 
 export default async function TaskPage({ params }: TaskPageProps) {
   const { projectId, taskId } = await params;
+  const session = await auth();
 
   const [project, task, subtasks] = await Promise.all([
-    getProjectById(projectId),
+    getProjectById(projectId, session?.user?.id),
     getTaskById(projectId, taskId),
     getSubtasksByTaskId(taskId),
   ]);
