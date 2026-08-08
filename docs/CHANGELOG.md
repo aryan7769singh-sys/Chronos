@@ -5,6 +5,35 @@ Format: `## [version] - YYYY-MM-DD`
 
 ---
 
+## [0.6.0] - 2026-08-08
+
+### Milestone 6: Calendar
+
+Integrates a full-featured productivity calendar featuring Month, Week, and Day views, event CRUD, read-only task deadline milestones, and strict tenant ownership.
+
+#### Added
+- `src/features/calendar/types/index.ts` — Calendar domain types, view modes, event types, unified `CalendarItem` union, and mutation inputs
+- `src/features/calendar/constants/calendar.ts` — Event type labels, badge styles, icons, view mode definitions, and Tailwind v4 color styles
+- `src/features/calendar/utils/dateGrid.ts` — Calendar grid utilities using `date-fns` for month matrix, week intervals, day filtering, and localized date titles
+- `src/services/calendar.service.ts` — Database access layer for range-scoped feed queries and strict ownership-validated CRUD operations
+- `src/features/calendar/actions/index.ts` — Server actions (`createEventAction`, `updateEventAction`, `deleteEventAction`) with session verification
+- `src/features/calendar/components/TaskDeadlineBadge.tsx` — Read-only milestone badge for task deadlines on the calendar
+- `src/features/calendar/components/CalendarHeader.tsx` — Navigation controls, localized title display, view switcher pill (`Month` / `Week` / `Day`), and `+ New Event` button
+- `src/features/calendar/components/MonthView/` — 7-column calendar matrix with weekday headers, day cells, all-day event pills, and overflow counters
+- `src/features/calendar/components/WeekView/` — 7-column 24-hour time grid with sticky all-day event shelf and auto-scroll to business hours
+- `src/features/calendar/components/DayView/` — Single-day hourly schedule agenda with detailed event cards and project badges
+- `src/features/calendar/components/EventDialog/EventFormDialog.tsx` — Unified Create & Edit modal supporting title, description, event type, all-day toggle, start/end dates and times, project selector, task selector, color picker, and location
+- `src/features/calendar/components/EventDialog/EventDetailModal.tsx` — Modal displaying event details, location, type badge, project tag, task tag, with Edit and Delete triggers
+- `src/features/calendar/components/CalendarView.tsx` — Top-level orchestrator synchronizing URL parameters, managing modal dialogs, and rendering Month, Week, or Day views
+- `CalendarEvent` model and `CalendarEventType` enum in Prisma schema
+
+#### Modified
+- `prisma/schema.prisma` — Added `CalendarEvent` model and relations on `User`, `Project`, and `Task`
+- `prisma/seed.ts` — Added initial `CalendarEvent` records for development user (`user-dev-1`)
+- `src/app/(app)/calendar/page.tsx` — Converted placeholder page into Server Component with URL date-range calculation and live feed querying
+
+---
+
 ## [0.5.0] - 2026-08-08
 
 ### Milestone 5: Authentication

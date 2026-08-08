@@ -573,6 +573,103 @@ async function main() {
     });
   }
 
+  // --- Calendar Events (user-dev-1) ---------------------------------------
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const day = today.getDate();
+
+  await prisma.calendarEvent.upsert({
+    where: { id: "event-1" },
+    update: {},
+    create: {
+      id: "event-1",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      taskId: "task-1-4",
+      title: "Deep Work: Database & Persistence",
+      description: "Complete Prisma migration and service layer implementation.",
+      type: "focus_block",
+      allDay: false,
+      startDate: new Date(year, month, day, 10, 0, 0),
+      endDate: new Date(year, month, day, 12, 0, 0),
+      color: "violet",
+      location: "Focus Room A",
+    },
+  });
+
+  await prisma.calendarEvent.upsert({
+    where: { id: "event-2" },
+    update: {},
+    create: {
+      id: "event-2",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      title: "Chronos Sprint Review",
+      description: "Weekly milestone demo with core design and engineering teams.",
+      type: "meeting",
+      allDay: false,
+      startDate: new Date(year, month, day, 14, 30, 0),
+      endDate: new Date(year, month, day, 15, 30, 0),
+      color: "violet",
+      location: "Virtual Meeting Room",
+    },
+  });
+
+  await prisma.calendarEvent.upsert({
+    where: { id: "event-3" },
+    update: {},
+    create: {
+      id: "event-3",
+      userId: "user-dev-1",
+      projectId: "proj-2",
+      title: "Portfolio Design Sync",
+      description: "Review hero animations and filter layout benchmarks.",
+      type: "meeting",
+      allDay: false,
+      startDate: new Date(year, month, day + 1, 11, 0, 0),
+      endDate: new Date(year, month, day + 1, 12, 0, 0),
+      color: "blue",
+      location: "Design Studio",
+    },
+  });
+
+  await prisma.calendarEvent.upsert({
+    where: { id: "event-4" },
+    update: {},
+    create: {
+      id: "event-4",
+      userId: "user-dev-1",
+      title: "Productivity OS Planning",
+      description: "Quarterly roadmap planning session and backlog grooming.",
+      type: "event",
+      allDay: true,
+      startDate: new Date(year, month, day + 2, 0, 0, 0),
+      endDate: new Date(year, month, day + 2, 23, 59, 59),
+      color: "emerald",
+      location: "Main Boardroom",
+    },
+  });
+
+  await prisma.calendarEvent.upsert({
+    where: { id: "event-5" },
+    update: {},
+    create: {
+      id: "event-5",
+      userId: "user-dev-1",
+      projectId: "proj-3",
+      title: "API Client Performance Review",
+      description: "Benchmark HTTP client serialization and error retry curves.",
+      type: "focus_block",
+      allDay: false,
+      startDate: new Date(year, month, day - 1, 15, 0, 0),
+      endDate: new Date(year, month, day - 1, 17, 0, 0),
+      color: "amber",
+      location: "Lab 3",
+    },
+  });
+
   console.log("✅ Seed complete.");
 }
 

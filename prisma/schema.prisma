@@ -44,22 +44,30 @@ enum TaskStatus {
   cancelled
 }
 
+enum CalendarEventType {
+  event
+  focus_block
+  meeting
+  reminder
+}
+
 // ---------------------------------------------------------------------------
 // Auth.js Models
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  projects      Project[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id             String          @id @default(cuid())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  projects       Project[]
+  calendarEvents CalendarEvent[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
 }
 
 model Account {
@@ -103,61 +111,97 @@ model VerificationToken {
 /// A top-level container for a body of related work.
 /// Every project is strictly owned by a User.
 model Project {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  description String        @default("")
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  description    String          @default("")
   /// One of the ProjectColor union values ("violet" | "blue" | ...)
-  color       String        @default("violet")
+  color          String          @default("violet")
   /// Lucide icon name string resolved at runtime via PROJECT_ICON_MAP
-  icon        String        @default("Layers")
-  status      ProjectStatus @default(active)
-  priority    Priority      @default(medium)
-  deadline    DateTime
-  health      ProjectHealth @default(on_track)
-  tasks       Task[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  icon           String          @default("Layers")
+  status         ProjectStatus   @default(active)
+  priority       Priority        @default(medium)
+  deadline       DateTime
+  health         ProjectHealth   @default(on_track)
+  tasks          Task[]
+  calendarEvents CalendarEvent[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
-  deletedAt   DateTime?
+  deletedAt      DateTime?
+
+  @@index([userId])
 }
 
 /// A discrete unit of work within a Project.
 model Task {
-  id                String     @id @default(cuid())
+  id                String          @id @default(cuid())
   projectId         String
-  project           Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title             String
-  description       String     @default("")
-  status            TaskStatus @default(backlog)
-  priority          Priority   @default(medium)
+  description       String          @default("")
+  status            TaskStatus      @default(backlog)
+  priority          Priority        @default(medium)
   /// Estimated time to complete, in minutes.
-  estimatedDuration Int        @default(0)
+  estimatedDuration Int             @default(0)
   /// Actual time spent, in minutes.
-  actualDuration    Int        @default(0)
+  actualDuration    Int             @default(0)
   deadline          DateTime
   /// The immediate next action required to advance this task.
-  currentStep       String     @default("")
+  currentStep       String          @default("")
   /// Free-form string tags stored as a PostgreSQL text array.
   tags              String[]
-  notes             String     @default("")
+  notes             String          @default("")
   subtasks          Subtask[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  calendarEvents    CalendarEvent[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
   deletedAt         DateTime?
+
+  @@index([projectId])
 }
 
 /// An atomic step within a Task.
 model Subtask {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   taskId    String
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   title     String
-  completed Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  completed Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
   deletedAt DateTime?
+
+  @@index([taskId])
+}
+
+/// A scheduled time block, meeting, focus session, or event.
+/// Strictly owned by a User; optionally linked to a Project and Task.
+model CalendarEvent {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?          @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId      String?
+  task        Task?             @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  title       String
+  description String            @default("")
+  type        CalendarEventType @default(event)
+  allDay      Boolean           @default(false)
+  startDate   DateTime
+  endDate     DateTime
+  color       String            @default("violet")
+  location    String            @default("")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  /// Soft-delete timestamp. NULL means the record is active.
+  deletedAt   DateTime?
+
+  @@index([userId, startDate, endDate])
+  @@index([projectId])
+  @@index([taskId])
 }
