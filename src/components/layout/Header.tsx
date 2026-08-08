@@ -22,6 +22,11 @@ import { cn } from "@/lib/utils";
 interface HeaderProps {
   /** Triggers the mobile sidebar Sheet */
   onMenuClick: () => void;
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +85,7 @@ function ThemeToggle() {
 // Header — public component
 // ---------------------------------------------------------------------------
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, user }: HeaderProps) {
   const pathname = usePathname();
 
   const currentPage =
@@ -145,7 +150,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </Button>
 
         {/* User menu with avatar & sign out */}
-        <UserMenu />
+        <UserMenu user={user} />
       </div>
     </header>
   );

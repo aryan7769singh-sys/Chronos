@@ -22,16 +22,18 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
-  const name = user?.name || "Alex Rivera";
-  const email = user?.email || "alex.rivera@example.com";
+  const name = user?.name || "User";
+  const email = user?.email || "";
   const image = user?.image || undefined;
 
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "U";
+  const initials =
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
 
   return (
     <DropdownMenu>
@@ -55,9 +57,11 @@ export function UserMenu({ user }: UserMenuProps) {
               <p className="text-xs font-semibold leading-none text-foreground">
                 {name}
               </p>
-              <p className="text-[11px] leading-none text-muted-foreground truncate">
-                {email}
-              </p>
+              {email && (
+                <p className="text-[11px] leading-none text-muted-foreground truncate">
+                  {email}
+                </p>
+              )}
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

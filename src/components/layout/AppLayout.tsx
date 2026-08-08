@@ -6,6 +6,11 @@ import { Header } from "@/components/layout/Header";
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
 }
 
 /**
@@ -17,7 +22,7 @@ interface AppLayoutProps {
  *
  * Renders Sidebar + Header + main content area.
  */
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, user }: AppLayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -33,7 +38,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Header onMenuClick={() => setIsMobileOpen(true)} />
+        <Header onMenuClick={() => setIsMobileOpen(true)} user={user} />
 
         <main
           id="app-main-content"

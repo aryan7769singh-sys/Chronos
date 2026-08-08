@@ -1,14 +1,18 @@
 import { AppLayout } from "@/components/layout/AppLayout";
+import { auth } from "@/lib/auth";
 
 /**
  * Route group layout for all authenticated app pages.
  * Wraps every page inside the (app) group with the AppLayout shell.
  * The (app) folder name is not reflected in the URL.
  */
-export default function AppGroupLayout({
+export default async function AppGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AppLayout>{children}</AppLayout>;
+  const session = await auth();
+
+  return <AppLayout user={session?.user}>{children}</AppLayout>;
 }
+
