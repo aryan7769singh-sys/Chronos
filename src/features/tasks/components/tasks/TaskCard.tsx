@@ -8,7 +8,6 @@ import {
   PRIORITY_DOT_CLASSES,
   PRIORITY_LABEL,
 } from "../../constants/domain";
-import { MOCK_SUBTASKS } from "../../constants/mockData";
 import type { Task } from "../../types";
 
 interface TaskCardProps {
@@ -17,10 +16,6 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, projectId }: TaskCardProps) {
-  const subtasks = MOCK_SUBTASKS.filter((s) => s.taskId === task.id);
-  const completedSubtasks = subtasks.filter((s) => s.completed).length;
-  const hasSubtasks = subtasks.length > 0;
-
   const isOverdue =
     task.status !== "done" &&
     task.status !== "cancelled" &&
@@ -65,12 +60,12 @@ export function TaskCard({ task, projectId }: TaskCardProps) {
             </span>
           </div>
 
-          {/* Footer: subtasks + deadline */}
+          {/* Footer: progress + deadline */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            {hasSubtasks && (
-              <span className="flex items-center gap-1">
+            {task.progress > 0 && (
+              <span className="flex items-center gap-1 font-medium tabular-nums">
                 <Layers className="size-3" />
-                {completedSubtasks}/{subtasks.length}
+                {task.progress}%
               </span>
             )}
             <span

@@ -124,7 +124,11 @@ export function TaskDetails({ task, project, subtasks }: TaskDetailsProps) {
 
           {/* Subtask checklist */}
           <div className="rounded-xl border border-border bg-card p-4">
-            <SubtaskChecklist subtasks={subtasks} />
+            <SubtaskChecklist
+              subtasks={subtasks}
+              projectId={project.id}
+              taskId={task.id}
+            />
           </div>
 
           {/* Notes */}

@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -6,7 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { MOCK_DEADLINES } from "../constants/mockData";
+import type { TaskWithProject } from "@/features/tasks/types";
+import { PROJECT_COLOR_STYLES } from "@/features/tasks/constants/domain";
 
 function getUrgencyLevel(dueDate: string): "critical" | "soon" | "normal" {
   const hoursUntil =
@@ -22,77 +24,93 @@ const URGENCY_DOT: Record<string, string> = {
   normal: "bg-muted-foreground/30",
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Work: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  Learning: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-  Dev: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  Finance: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-};
+interface UpcomingDeadlinesProps {
+  deadlines?: TaskWithProject[];
+}
 
-export function UpcomingDeadlines() {
+export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Upcoming Deadlines</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Upcoming Deadlines</CardTitle>
+          <Link
+            href="/calendar"
+            className="text-[11px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 hover:underline"
+          >
+            Calendar
+          </Link>
+        </div>
       </CardHeader>
 
       <CardContent>
-        <ul className="space-y-2" role="list">
-          {MOCK_DEADLINES.map((deadline) => {
-            const urgency = getUrgencyLevel(deadline.dueDate);
-            const relativeTime = formatDistanceToNow(new Date(deadline.dueDate), {
-              addSuffix: true,
-            });
-            const categoryColor =
-              CATEGORY_COLORS[deadline.category] ??
-              "bg-muted text-muted-foreground";
+        {deadlines.length > 0 ? (
+          <ul className="space-y-2" role="list">
+            {deadlines.map((deadline) => {
+              const urgency = getUrgencyLevel(deadline.deadline);
+              const relativeTime = formatDistanceToNow(new Date(deadline.deadline), {
+                addSuffix: true,
+              });
+              const colorStyles =
+                PROJECT_COLOR_STYLES[deadline.project.color] ||
+                PROJECT_COLOR_STYLES.violet;
 
-            return (
-              <li
-                key={deadline.id}
-                className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
-              >
-                {/* Urgency dot */}
-                <span
-                  className={cn(
-                    "size-1.5 shrink-0 rounded-full",
-                    URGENCY_DOT[urgency]
-                  )}
-                  aria-hidden
-                />
-
-                {/* Title */}
-                <span className="flex-1 text-sm leading-snug text-foreground">
-                  {deadline.title}
-                </span>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Category badge */}
+              return (
+                <li
+                  key={deadline.id}
+                  className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
+                >
+                  {/* Urgency dot */}
                   <span
                     className={cn(
-                      "rounded-full px-2 py-0.5 text-[0.65rem] font-medium",
-                      categoryColor
+                      "size-1.5 shrink-0 rounded-full",
+                      URGENCY_DOT[urgency]
                     )}
-                  >
-                    {deadline.category}
-                  </span>
+                    aria-hidden
+                  />
 
-                  {/* Relative time */}
-                  <span
-                    className={cn(
-                      "text-xs tabular-nums",
-                      urgency === "critical"
-                        ? "text-destructive font-medium"
-                        : "text-muted-foreground"
-                    )}
+                  {/* Title Link */}
+                  <Link
+                    href={`/projects/${deadline.projectId}/${deadline.id}`}
+                    className="flex-1 text-sm leading-snug text-foreground hover:text-primary transition-colors truncate"
                   >
-                    {relativeTime}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                    {deadline.title}
+                  </Link>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Project badge */}
+                    <span
+                      className={cn(
+                        "rounded-md px-1.5 py-0.5 text-[10px] font-medium border",
+                        colorStyles.badge
+                      )}
+                    >
+                      {deadline.project.name}
+                    </span>
+
+                    {/* Relative time */}
+                    <span
+                      className={cn(
+                        "text-xs tabular-nums",
+                        urgency === "critical"
+                          ? "text-destructive font-medium"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {relativeTime}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="py-4 text-center">
+            <p className="text-xs text-muted-foreground">
+              No upcoming task deadlines.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

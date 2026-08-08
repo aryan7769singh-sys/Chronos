@@ -1,4 +1,3 @@
-
 // ---------------------------------------------------------------------------
 // Shared primitives
 // ---------------------------------------------------------------------------
@@ -48,11 +47,34 @@ export type Project = {
   priority: Priority;
   /** ISO date string */
   deadline: string;
-  /** 0–100, pre-computed from task completion in mock data */
+  /** 0–100, pre-computed from task completion in mock/service data */
   progress: number;
   health: ProjectHealth;
+  /** Total active tasks under this project */
+  taskCount?: number;
+  /** Completed active tasks under this project */
+  completedTaskCount?: number;
   /** ISO date string */
   createdAt: string;
+};
+
+export type CreateProjectInput = {
+  name: string;
+  description?: string;
+  color?: ProjectColor;
+  icon?: string;
+  priority?: Priority;
+  deadline?: string;
+};
+
+export type UpdateProjectInput = {
+  name?: string;
+  description?: string;
+  color?: ProjectColor;
+  icon?: string;
+  priority?: Priority;
+  status?: ProjectStatus;
+  deadline?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -81,7 +103,7 @@ export type Task = {
   actualDuration: number;
   /** ISO date string */
   deadline: string;
-  /** 0–100, pre-computed from subtask completion in mock data */
+  /** 0–100, pre-computed from subtask completion in mock/service data */
   progress: number;
   /** The immediate next action to take */
   currentStep: string;
@@ -89,6 +111,17 @@ export type Task = {
   notes: string;
   /** ISO date string */
   createdAt: string;
+};
+
+export type TaskWithProject = Task & {
+  project: {
+    id: string;
+    name: string;
+    color: ProjectColor;
+    icon: string;
+  };
+  subtaskCount: number;
+  completedSubtaskCount: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -100,4 +133,57 @@ export type Subtask = {
   taskId: string;
   title: string;
   completed: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// Global View & Filter Types
+// ---------------------------------------------------------------------------
+
+export type TaskViewMode = "list" | "board" | "project";
+
+export type TaskFilterState = {
+  search: string;
+  status: TaskStatus | "all";
+  priority: Priority | "all";
+  projectId: string | "all";
+  dueFilter: "all" | "today" | "upcoming" | "overdue";
+  viewMode: TaskViewMode;
+};
+
+export type TaskStats = {
+  total: number;
+  todoCount: number;
+  inProgressCount: number;
+  doneCount: number;
+  blockedCount: number;
+  dueTodayCount: number;
+  overdueCount: number;
+  urgentCount: number;
+};
+
+export type CreateTaskInput = {
+  title: string;
+  description?: string;
+  projectId: string;
+  priority?: Priority;
+  status?: TaskStatus;
+  deadline?: string;
+  estimatedDuration?: number;
+  currentStep?: string;
+  tags?: string[];
+  notes?: string;
+};
+
+export type UpdateTaskInput = {
+  title?: string;
+  description?: string;
+  projectId?: string;
+  priority?: Priority;
+  status?: TaskStatus;
+  deadline?: string;
+  estimatedDuration?: number;
+  actualDuration?: number;
+  currentStep?: string;
+  tags?: string[];
+  notes?: string;
 };

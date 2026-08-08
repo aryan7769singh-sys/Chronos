@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { getHabitSummary } from "@/services/habit.service";
+import { getTodaysTasks, getUpcomingDeadlines } from "@/services/task.service";
 import { WelcomeHero } from "@/features/dashboard/components/WelcomeHero";
 import { TodaysFocus } from "@/features/dashboard/components/TodaysFocus";
 import { TodaysTasks } from "@/features/dashboard/components/TodaysTasks";
@@ -13,9 +14,14 @@ export const metadata = { title: "Dashboard — Chronos" };
 
 export default async function DashboardPage() {
   const session = await auth();
-  const habits = session?.user?.id
-    ? await getHabitSummary(session.user.id)
-    : [];
+
+  const [habits, todaysTasks, upcomingDeadlines] = session?.user?.id
+    ? await Promise.all([
+        getHabitSummary(session.user.id),
+        getTodaysTasks(session.user.id),
+        getUpcomingDeadlines(session.user.id),
+      ])
+    : [[], [], []];
 
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6 max-w-[1400px] mx-auto">
@@ -27,8 +33,8 @@ export default async function DashboardPage() {
         {/* Left: Primary column */}
         <div className="space-y-4 md:space-y-6">
           <TodaysFocus />
-          <TodaysTasks />
-          <UpcomingDeadlines />
+          <TodaysTasks tasks={todaysTasks} />
+          <UpcomingDeadlines deadlines={upcomingDeadlines} />
         </div>
 
         {/* Right: Secondary column */}

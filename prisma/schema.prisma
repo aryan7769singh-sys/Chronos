@@ -162,6 +162,7 @@ model Task {
   deletedAt         DateTime?
 
   @@index([projectId])
+  @@index([deadline])
 }
 
 /// An atomic step within a Task.

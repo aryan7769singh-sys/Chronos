@@ -10,6 +10,7 @@
 import { prisma } from "@/lib/prisma";
 import {
   ProjectStatus as PrismaProjectStatus,
+  ProjectHealth as PrismaProjectHealth,
   Priority as PrismaPriority,
 } from "@prisma/client";
 import type {
@@ -19,6 +20,8 @@ import type {
   ProjectStatus,
   ProjectColor,
   Priority,
+  CreateProjectInput,
+  UpdateProjectInput,
 } from "@/features/tasks/types";
 import { calculateTaskProgress } from "@/features/tasks/utils/progress";
 import { calculateProjectHealth } from "@/features/tasks/utils/health";
@@ -35,6 +38,14 @@ function mapProjectStatus(s: PrismaProjectStatus): ProjectStatus {
 // Priority values are identical between Prisma and app types.
 function mapPriority(p: PrismaPriority): Priority {
   return p as Priority;
+}
+
+function mapAppPriorityToPrisma(p: Priority): PrismaPriority {
+  return p as PrismaPriority;
+}
+
+function mapAppStatusToPrisma(s: ProjectStatus): PrismaProjectStatus {
+  return s as PrismaProjectStatus;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,6 +81,7 @@ type PrismaTask = {
 
 type PrismaProject = {
   id: string;
+  userId: string;
   name: string;
   description: string;
   color: string;
@@ -92,15 +104,20 @@ type PrismaProject = {
  * - per-task progress (derived from subtask completion ratios)
  * - overall project progress (average of task progress values)
  * - project health (timeline-based, via the existing utility)
+ * - taskCount and completedTaskCount
  *
  * Returns a fully-shaped app Project object.
  */
 function mapProject(raw: PrismaProject): Project {
-  const activeTasks = raw.tasks.filter((t) => !t.deletedAt);
+  const activeTasks = raw.tasks ? raw.tasks.filter((t) => !t.deletedAt) : [];
+  const taskCount = activeTasks.length;
+  const completedTaskCount = activeTasks.filter(
+    (t) => t.status === "done"
+  ).length;
 
   // Step 1: compute progress for each task from its active subtasks
   const taskProgressValues: number[] = activeTasks.map((t) => {
-    const activeSubtasks = t.subtasks.filter((s) => !s.deletedAt);
+    const activeSubtasks = t.subtasks ? t.subtasks.filter((s) => !s.deletedAt) : [];
     const subtaskAppValues: Subtask[] = activeSubtasks.map((s) => ({
       id: s.id,
       taskId: s.taskId,
@@ -120,18 +137,19 @@ function mapProject(raw: PrismaProject): Project {
       : 0;
 
   // Step 3: build a partial project object for the health utility.
-  // Only the fields consumed by calculateProjectHealth are needed here.
   const projectForHealth: Project = {
     id: raw.id,
     name: raw.name,
     description: raw.description,
-    color: raw.color as ProjectColor,
-    icon: raw.icon,
+    color: (raw.color as ProjectColor) || "violet",
+    icon: raw.icon || "Layers",
     status: mapProjectStatus(raw.status),
     priority: mapPriority(raw.priority),
     deadline: raw.deadline.toISOString(),
     progress,
     health: "on-track", // placeholder — replaced below
+    taskCount,
+    completedTaskCount,
     createdAt: raw.createdAt.toISOString(),
   };
 
@@ -183,7 +201,7 @@ export async function getAllProjects(userId?: string): Promise<Project[]> {
     orderBy: { createdAt: "desc" },
   });
 
-  return projects.map(mapProject);
+  return projects.map((p) => mapProject(p as unknown as PrismaProject));
 }
 
 /**
@@ -211,6 +229,121 @@ export async function getProjectById(
   });
 
   if (!project) return null;
-  return mapProject(project);
+  return mapProject(project as unknown as PrismaProject);
 }
 
+/**
+ * Creates a new project owned by the authenticated user.
+ */
+export async function createProject(
+  userId: string,
+  input: CreateProjectInput
+): Promise<Project> {
+  const deadlineDate = input.deadline
+    ? new Date(input.deadline)
+    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  const record = await prisma.project.create({
+    data: {
+      userId,
+      name: input.name.trim(),
+      description: input.description?.trim() || "",
+      color: input.color || "violet",
+      icon: input.icon || "Layers",
+      priority: input.priority
+        ? mapAppPriorityToPrisma(input.priority)
+        : PrismaPriority.medium,
+      deadline: deadlineDate,
+      status: PrismaProjectStatus.active,
+      health: PrismaProjectHealth.on_track,
+    },
+    include: {
+      tasks: {
+        where: { deletedAt: null },
+        include: {
+          subtasks: { where: { deletedAt: null } },
+        },
+      },
+    },
+  });
+
+  return mapProject(record as unknown as PrismaProject);
+}
+
+/**
+ * Updates an existing project ensuring user ownership.
+ */
+export async function updateProject(
+  projectId: string,
+  userId: string,
+  input: UpdateProjectInput
+): Promise<Project> {
+  const existing = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      userId,
+      deletedAt: null,
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Project not found or unauthorized.");
+  }
+
+  const updated = await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      name: input.name !== undefined ? input.name.trim() : undefined,
+      description:
+        input.description !== undefined ? input.description.trim() : undefined,
+      color: input.color !== undefined ? input.color : undefined,
+      icon: input.icon !== undefined ? input.icon : undefined,
+      priority:
+        input.priority !== undefined
+          ? mapAppPriorityToPrisma(input.priority)
+          : undefined,
+      status:
+        input.status !== undefined
+          ? mapAppStatusToPrisma(input.status)
+          : undefined,
+      deadline: input.deadline ? new Date(input.deadline) : undefined,
+    },
+    include: {
+      tasks: {
+        where: { deletedAt: null },
+        include: {
+          subtasks: { where: { deletedAt: null } },
+        },
+      },
+    },
+  });
+
+  return mapProject(updated as unknown as PrismaProject);
+}
+
+/**
+ * Soft-deletes a project ensuring user ownership.
+ */
+export async function deleteProject(
+  projectId: string,
+  userId: string
+): Promise<void> {
+  const existing = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      userId,
+      deletedAt: null,
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Project not found or unauthorized.");
+  }
+
+  await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+}

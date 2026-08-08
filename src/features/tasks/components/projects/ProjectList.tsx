@@ -7,7 +7,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ProjectCard } from "./ProjectCard";
 import { CreateProjectDialog } from "./CreateProjectDialog";
-import { MOCK_TASKS } from "../../constants/mockData";
 import type { Project, ProjectStatus } from "../../types";
 
 interface ProjectListProps {
@@ -82,18 +81,14 @@ export function ProjectList({ projects }: ProjectListProps) {
       {/* Project grid */}
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((project) => {
-            const tasks = MOCK_TASKS.filter((t) => t.projectId === project.id);
-            const completedTasks = tasks.filter((t) => t.status === "done");
-            return (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                taskCount={tasks.length}
-                completedTaskCount={completedTasks.length}
-              />
-            );
-          })}
+          {filtered.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              taskCount={project.taskCount ?? 0}
+              completedTaskCount={project.completedTaskCount ?? 0}
+            />
+          ))}
         </div>
       ) : (
         /* Empty state */

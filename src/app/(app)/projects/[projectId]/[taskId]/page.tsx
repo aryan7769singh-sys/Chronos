@@ -22,8 +22,8 @@ export default async function TaskPage({ params }: TaskPageProps) {
 
   const [project, task, subtasks] = await Promise.all([
     getProjectById(projectId, session?.user?.id),
-    getTaskById(projectId, taskId),
-    getSubtasksByTaskId(taskId),
+    getTaskById(projectId, taskId, session?.user?.id),
+    getSubtasksByTaskId(taskId, session?.user?.id),
   ]);
 
   if (!project || !task) notFound();

@@ -22,7 +22,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const [project, tasks] = await Promise.all([
     getProjectById(projectId, session?.user?.id),
-    getTasksByProjectId(projectId),
+    getTasksByProjectId(projectId, session?.user?.id),
   ]);
 
   if (!project) notFound();

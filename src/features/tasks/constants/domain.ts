@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Layers,
   Globe,
@@ -32,6 +33,24 @@ export const PROJECT_ICON_MAP: Record<string, LucideIcon> = {
 
 /** Fallback icon when an unknown name is encountered. */
 export const FALLBACK_ICON = Layers;
+
+export function getProjectIcon(iconName?: string | null): LucideIcon {
+  if (!iconName) return Layers;
+  return PROJECT_ICON_MAP[iconName] ?? Layers;
+}
+
+export function ProjectIcon({
+  iconName,
+  className,
+  strokeWidth = 2,
+}: {
+  iconName?: string | null;
+  className?: string;
+  strokeWidth?: number;
+}) {
+  const IconComp = getProjectIcon(iconName);
+  return React.createElement(IconComp, { className, strokeWidth });
+}
 
 // ---------------------------------------------------------------------------
 // Project color classes
@@ -83,6 +102,60 @@ export const PROJECT_COLOR_CLASSES: Record<
     softBg: "bg-red-500/5",
   },
   pink: {
+    border: "border-l-pink-500",
+    iconBg: "bg-pink-500/15",
+    iconText: "text-pink-500",
+    softBg: "bg-pink-500/5",
+  },
+};
+
+export const PROJECT_COLOR_STYLES: Record<
+  ProjectColor,
+  {
+    badge: string;
+    border: string;
+    iconBg: string;
+    iconText: string;
+    softBg: string;
+  }
+> = {
+  violet: {
+    badge: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20",
+    border: "border-l-violet-500",
+    iconBg: "bg-violet-500/15",
+    iconText: "text-violet-500",
+    softBg: "bg-violet-500/5",
+  },
+  blue: {
+    badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    border: "border-l-blue-500",
+    iconBg: "bg-blue-500/15",
+    iconText: "text-blue-500",
+    softBg: "bg-blue-500/5",
+  },
+  amber: {
+    badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    border: "border-l-amber-500",
+    iconBg: "bg-amber-500/15",
+    iconText: "text-amber-500",
+    softBg: "bg-amber-500/5",
+  },
+  emerald: {
+    badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    border: "border-l-emerald-500",
+    iconBg: "bg-emerald-500/15",
+    iconText: "text-emerald-500",
+    softBg: "bg-emerald-500/5",
+  },
+  red: {
+    badge: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+    border: "border-l-red-500",
+    iconBg: "bg-red-500/15",
+    iconText: "text-red-500",
+    softBg: "bg-red-500/5",
+  },
+  pink: {
+    badge: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
     border: "border-l-pink-500",
     iconBg: "bg-pink-500/15",
     iconText: "text-pink-500",

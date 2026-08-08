@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   Layers,
   Globe,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { ProjectColor, Priority } from "../../types";
+import { createProjectAction } from "../../actions";
 
 // ---------------------------------------------------------------------------
 // Preset options
@@ -66,17 +67,41 @@ interface CreateProjectDialogProps {
 }
 
 export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps) {
+  const [isPending, startTransition] = useTransition();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState<ProjectColor>("violet");
   const [iconId, setIconId] = useState("Layers");
   const [priority, setPriority] = useState<Priority>("medium");
   const [deadline, setDeadline] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // UI only — no persistence in this milestone
-    handleClose();
+    if (!name.trim()) {
+      setError("Please enter a project name.");
+      return;
+    }
+
+    setError(null);
+    startTransition(async () => {
+      try {
+        await createProjectAction({
+          name,
+          description,
+          color,
+          icon: iconId,
+          priority,
+          deadline: deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+        handleClose();
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error ? err.message : "Failed to create project."
+        );
+      }
+    });
   }
 
   function handleClose() {
@@ -86,17 +111,24 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
     setIconId("Layers");
     setPriority("medium");
     setDeadline("");
+    setError(null);
     onClose();
   }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New Project</DialogTitle>
         </DialogHeader>
 
-        <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4">
+        <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4 pt-1">
+          {error && (
+            <div className="rounded-md bg-destructive/10 p-2.5 text-xs text-destructive">
+              {error}
+            </div>
+          )}
+
           {/* Name */}
           <div className="space-y-1.5">
             <label htmlFor="project-name" className="text-sm font-medium">
@@ -137,7 +169,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
                   aria-label={opt.id}
                   onClick={() => setColor(opt.id)}
                   className={cn(
-                    "size-7 rounded-full transition-all duration-150",
+                    "size-7 rounded-full transition-all duration-150 cursor-pointer",
                     opt.bg,
                     color === opt.id && `ring-2 ring-offset-2 ring-offset-background ${opt.ring}`
                   )}
@@ -159,7 +191,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
                     aria-label={opt.id}
                     onClick={() => setIconId(opt.id)}
                     className={cn(
-                      "flex size-9 items-center justify-center rounded-lg border transition-all duration-150",
+                      "flex size-9 items-center justify-center rounded-lg border transition-all duration-150 cursor-pointer",
                       iconId === opt.id
                         ? "border-ring bg-muted text-foreground"
                         : "border-border bg-background text-muted-foreground hover:text-foreground"
@@ -182,7 +214,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
                   type="button"
                   onClick={() => setPriority(opt.id)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 rounded-md py-1 text-xs font-medium transition-all duration-150",
+                    "flex-1 flex items-center justify-center gap-1.5 rounded-md py-1 text-xs font-medium transition-all duration-150 cursor-pointer",
                     priority === opt.id
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -209,17 +241,24 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
           </div>
         </form>
 
-        <DialogFooter>
-          <Button variant="outline" size="sm" type="button" onClick={handleClose}>
+        <DialogFooter className="pt-2 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={handleClose}
+            disabled={isPending}
+          >
             Cancel
           </Button>
           <Button
             size="sm"
             type="submit"
             form="create-project-form"
-            disabled={!name.trim()}
+            disabled={!name.trim() || isPending}
+            className="bg-violet-600 hover:bg-violet-700 text-white"
           >
-            Create Project
+            {isPending ? "Creating…" : "Create Project"}
           </Button>
         </DialogFooter>
       </DialogContent>
