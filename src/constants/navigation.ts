@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  FolderKanban,
   CalendarDays,
   CheckSquare,
   Repeat2,
@@ -27,6 +28,11 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Projects",
+    href: "/projects",
+    icon: FolderKanban,
   },
   {
     label: "Calendar",
