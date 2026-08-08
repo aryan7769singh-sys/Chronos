@@ -66,6 +66,7 @@ model User {
   projects       Project[]
   calendarEvents CalendarEvent[]
   habits         Habit[]
+  focusSessions  FocusSession[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -127,6 +128,7 @@ model Project {
   health         ProjectHealth   @default(on_track)
   tasks          Task[]
   calendarEvents CalendarEvent[]
+  focusSessions  FocusSession[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -156,6 +158,7 @@ model Task {
   notes             String          @default("")
   subtasks          Subtask[]
   calendarEvents    CalendarEvent[]
+  focusSessions     FocusSession[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -255,3 +258,34 @@ model HabitLog {
   @@index([habitId, date])
 }
 
+// ---------------------------------------------------------------------------
+// Focus & Deep Work Domain Models
+// ---------------------------------------------------------------------------
+
+/// A focused execution block / pomodoro session.
+/// Strictly owned by a User; optionally linked to a Project and Task.
+model FocusSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId      String?
+  project        Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId         String?
+  task           Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  /// "pomodoro" | "short_break" | "long_break" | "custom" | "stopwatch"
+  mode           String    @default("pomodoro")
+  /// Duration spent, in seconds
+  duration       Int
+  /// Planned/target duration, in seconds
+  targetDuration Int
+  completed      Boolean   @default(true)
+  notes          String    @default("")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  /// Soft-delete timestamp. NULL means the record is active.
+  deletedAt      DateTime?
+
+  @@index([userId, createdAt])
+  @@index([projectId])
+  @@index([taskId])
+}

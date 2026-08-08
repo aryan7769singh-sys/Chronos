@@ -1,4 +1,5 @@
-import { Clock, Play } from "lucide-react";
+import Link from "next/link";
+import { Clock, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,74 +13,146 @@ import {
   ProgressLabel,
   ProgressValue,
 } from "@/components/ui/progress";
+import { PROJECT_COLOR_STYLES, ProjectIcon } from "@/features/tasks/constants/domain";
+import type { FocusTaskInfo } from "@/features/timer/types";
 import { cn } from "@/lib/utils";
-import { MOCK_FOCUS_TASK } from "../constants/mockData";
 
 const PRIORITY_BADGE: Record<string, string> = {
-  high: "bg-destructive/10 text-destructive ring-destructive/20 dark:bg-destructive/20",
-  medium: "bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-amber-500/20",
-  low: "bg-muted text-muted-foreground ring-border",
+  urgent: "bg-destructive/15 text-destructive border-destructive/30",
+  high: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30",
+  medium: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+  low: "bg-muted text-muted-foreground border-border/50",
 };
 
 const PRIORITY_LABEL: Record<string, string> = {
+  urgent: "Urgent Priority",
   high: "High Priority",
   medium: "Medium Priority",
   low: "Low Priority",
 };
 
-export function TodaysFocus() {
-  const task = MOCK_FOCUS_TASK;
+interface TodaysFocusProps {
+  task?: FocusTaskInfo | null;
+}
+
+export function TodaysFocus({ task }: TodaysFocusProps) {
+  if (!task) {
+    return (
+      <Card className="border-border/60 bg-card/60 backdrop-blur-xs">
+        <CardHeader className="pb-3">
+          <CardTitle>Today&apos;s Focus</CardTitle>
+        </CardHeader>
+        <CardContent className="py-6 text-center space-y-2">
+          <Sparkles className="size-6 mx-auto text-muted-foreground/60" />
+          <p className="text-sm font-medium text-foreground">
+            No active tasks to focus on
+          </p>
+          <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+            Create or select a task in your projects to launch a focused deep work session.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Link href="/focus" className="w-full">
+            <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
+              <Play className="size-3.5" />
+              Open Focus Timer
+            </Button>
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  const colorStyles =
+    PROJECT_COLOR_STYLES[task.projectColor] || PROJECT_COLOR_STYLES.violet;
+
+  // Calculate progress ratio (actualDuration / estimatedDuration)
+  const progressPercent =
+    task.estimatedDuration > 0
+      ? Math.min(100, Math.round((task.actualDuration / task.estimatedDuration) * 100))
+      : 0;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/60 bg-card/60 backdrop-blur-xs">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle>Today&apos;s Focus</CardTitle>
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1",
-              PRIORITY_BADGE[task.priority]
-            )}
-          >
-            {PRIORITY_LABEL[task.priority]}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border",
+                colorStyles.badge
+              )}
+            >
+              <ProjectIcon iconName={task.projectIcon} className="size-3" />
+              <span className="truncate max-w-[100px]">{task.projectName}</span>
+            </span>
+
+            <span
+              className={cn(
+                "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border uppercase tracking-wider",
+                PRIORITY_BADGE[task.priority] || PRIORITY_BADGE.medium
+              )}
+            >
+              {PRIORITY_LABEL[task.priority] || task.priority}
+            </span>
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {/* Task title */}
-        <p className="text-base font-medium leading-snug text-foreground">
+        <p className="text-base font-semibold leading-snug text-foreground truncate">
           {task.title}
         </p>
 
         {/* Next step */}
-        <div className="flex items-start gap-2 text-sm text-muted-foreground">
-          <span className="mt-0.5 shrink-0 font-medium text-foreground/60">
-            Next:
-          </span>
-          <span>{task.nextStep}</span>
-        </div>
+        {task.currentStep ? (
+          <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 p-2 rounded-md border border-border/40">
+            <span className="font-semibold text-foreground shrink-0">
+              Next step:
+            </span>
+            <span className="truncate">{task.currentStep}</span>
+          </div>
+        ) : null}
 
-        {/* Estimated duration */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Clock className="size-3.5 shrink-0" />
-          <span>~{task.estimatedMinutes} min estimated</span>
+        {/* Time spent vs Estimated */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Clock className="size-3.5 shrink-0" />
+            <span>
+              {task.actualDuration}m spent
+              {task.estimatedDuration > 0 && ` / ~${task.estimatedDuration}m est.`}
+            </span>
+          </div>
+          {task.estimatedDuration > 0 && (
+            <span className="font-mono text-[11px] font-medium text-foreground">
+              {progressPercent}%
+            </span>
+          )}
         </div>
 
         {/* Progress bar */}
-        <div className="space-y-1">
-          <Progress value={task.progressPercent}>
-            <ProgressLabel>Progress</ProgressLabel>
-            <ProgressValue>{task.progressPercent}%</ProgressValue>
-          </Progress>
-        </div>
+        {task.estimatedDuration > 0 && (
+          <div className="space-y-1">
+            <Progress value={progressPercent} className="h-1.5">
+              <ProgressLabel className="sr-only">Focus progress</ProgressLabel>
+              <ProgressValue className="sr-only">{progressPercent}%</ProgressValue>
+            </Progress>
+          </div>
+        )}
       </CardContent>
 
-      <CardFooter>
-        <Button className="w-full gap-2" size="sm">
-          <Play className="size-3.5" />
-          Resume
-        </Button>
+      <CardFooter className="pt-1">
+        <Link href={`/focus?taskId=${task.id}`} className="w-full">
+          <Button
+            className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white cursor-pointer"
+            size="sm"
+          >
+            <Play className="size-3.5 fill-current" />
+            Start Focus Session
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   );

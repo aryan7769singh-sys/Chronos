@@ -801,6 +801,56 @@ async function main() {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // Focus Sessions Seed
+  // -------------------------------------------------------------------------
+  const focusSeeds = [
+    {
+      id: "focus-sess-1",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      taskId: "task-1-1",
+      mode: "pomodoro",
+      duration: 1500, // 25m
+      targetDuration: 1500,
+      completed: true,
+      notes: "Initial auth architecture setup",
+      createdAt: daysFromNow(-1),
+    },
+    {
+      id: "focus-sess-2",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      taskId: "task-1-2",
+      mode: "pomodoro",
+      duration: 1500,
+      targetDuration: 1500,
+      completed: true,
+      notes: "Login screen UI implementation",
+      createdAt: daysFromNow(-1),
+    },
+    {
+      id: "focus-sess-3",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      taskId: "task-1-2",
+      mode: "pomodoro",
+      duration: 1500,
+      targetDuration: 1500,
+      completed: true,
+      notes: "Header avatar and user menu",
+      createdAt: new Date(),
+    },
+  ];
+
+  for (const s of focusSeeds) {
+    await prisma.focusSession.upsert({
+      where: { id: s.id },
+      update: {},
+      create: s,
+    });
+  }
+
   console.log("✅ Seed complete.");
 }
 
