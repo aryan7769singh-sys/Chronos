@@ -670,6 +670,137 @@ async function main() {
     },
   });
 
+  // --- Habits (user-dev-1) ------------------------------------------------
+
+  const habitsSeed = [
+    {
+      id: "habit-1",
+      title: "Code Practice",
+      description: "Daily algorithms, open source work, or architecture practice.",
+      category: "Productivity",
+      color: "violet",
+      icon: "Code2",
+      frequency: "daily",
+      targetDaysPerWeek: 7,
+      completedToday: true,
+      streakCount: 14,
+    },
+    {
+      id: "habit-2",
+      title: "Read",
+      description: "Read 20 pages of technical books, essays, or non-fiction.",
+      category: "Learning",
+      color: "blue",
+      icon: "BookOpen",
+      frequency: "daily",
+      targetDaysPerWeek: 7,
+      completedToday: true,
+      streakCount: 7,
+    },
+    {
+      id: "habit-3",
+      title: "Exercise",
+      description: "Morning workout, gym, running, or stretching session.",
+      category: "Fitness",
+      color: "emerald",
+      icon: "Dumbbell",
+      frequency: "daily",
+      targetDaysPerWeek: 5,
+      completedToday: false,
+      streakCount: 5,
+    },
+    {
+      id: "habit-4",
+      title: "Drink Water",
+      description: "Stay hydrated throughout the day: 2.5–3 liters goal.",
+      category: "Health",
+      color: "cyan",
+      icon: "Droplets",
+      frequency: "daily",
+      targetDaysPerWeek: 7,
+      completedToday: true,
+      streakCount: 21,
+    },
+    {
+      id: "habit-5",
+      title: "Sleep 8hrs",
+      description: "Maintain a calm sleep schedule with ≥8 hours rest.",
+      category: "Health",
+      color: "indigo",
+      icon: "Moon",
+      frequency: "daily",
+      targetDaysPerWeek: 7,
+      completedToday: false,
+      streakCount: 3,
+    },
+    {
+      id: "habit-6",
+      title: "Eat Healthy",
+      description: "Balanced nutrition, whole foods, minimal processed sugars.",
+      category: "Health",
+      color: "amber",
+      icon: "Apple",
+      frequency: "daily",
+      targetDaysPerWeek: 7,
+      completedToday: false,
+      streakCount: 2,
+    },
+  ];
+
+  for (const h of habitsSeed) {
+    await prisma.habit.upsert({
+      where: { id: h.id },
+      update: {},
+      create: {
+        id: h.id,
+        userId: "user-dev-1",
+        title: h.title,
+        description: h.description,
+        category: h.category,
+        color: h.color,
+        icon: h.icon,
+        frequency: h.frequency,
+        targetDaysPerWeek: h.targetDaysPerWeek,
+      },
+    });
+
+    // Populate habit logs for the past 28 days
+    for (let offset = 0; offset < 28; offset++) {
+      const logDate = new Date(Date.now() - offset * 24 * 60 * 60 * 1000);
+      const dateStr = logDate.toISOString().slice(0, 10);
+
+      // Determine completion status to match streak
+      let isCompleted = false;
+      if (h.completedToday) {
+        if (offset < h.streakCount) isCompleted = true;
+      } else {
+        if (offset > 0 && offset <= h.streakCount) isCompleted = true;
+      }
+
+      // Add occasional past completions for visual realism
+      if (offset > h.streakCount + 2 && offset % 2 === 0) {
+        isCompleted = true;
+      }
+
+      if (isCompleted) {
+        await prisma.habitLog.upsert({
+          where: {
+            habitId_date: {
+              habitId: h.id,
+              date: dateStr,
+            },
+          },
+          update: { completed: true },
+          create: {
+            habitId: h.id,
+            date: dateStr,
+            completed: true,
+          },
+        });
+      }
+    }
+  }
+
   console.log("✅ Seed complete.");
 }
 

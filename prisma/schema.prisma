@@ -65,6 +65,7 @@ model User {
   sessions       Session[]
   projects       Project[]
   calendarEvents CalendarEvent[]
+  habits         Habit[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -205,3 +206,51 @@ model CalendarEvent {
   @@index([projectId])
   @@index([taskId])
 }
+
+// ---------------------------------------------------------------------------
+// Habits Domain Models
+// ---------------------------------------------------------------------------
+
+/// A recurring activity tracked over time for personal productivity.
+/// Strictly owned by a User.
+model Habit {
+  id                String     @id @default(cuid())
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title             String
+  description       String     @default("")
+  category          String     @default("General")
+  /// One of the ProjectColor union values ("violet" | "blue" | "emerald" | ...)
+  color             String     @default("violet")
+  /// Lucide icon name string resolved at runtime via HABIT_ICON_MAP
+  icon              String     @default("Repeat2")
+  /// "daily" | "weekly"
+  frequency         String     @default("daily")
+  /// Target completions per week (1-7)
+  targetDaysPerWeek Int        @default(7)
+  archived          Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  /// Soft-delete timestamp. NULL means the record is active.
+  deletedAt         DateTime?
+  logs              HabitLog[]
+
+  @@index([userId])
+}
+
+/// A single daily completion entry/log for a Habit.
+model HabitLog {
+  id        String   @id @default(cuid())
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  /// Normalized ISO day string (e.g. "2026-08-08")
+  date      String
+  completed Boolean  @default(true)
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([habitId, date])
+  @@index([habitId, date])
+}
+

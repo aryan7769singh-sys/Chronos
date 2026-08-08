@@ -5,6 +5,39 @@ Format: `## [version] - YYYY-MM-DD`
 
 ---
 
+## [0.7.0] - 2026-08-08
+
+### Milestone 7: Habits
+
+Implements full-featured daily habit tracking, streak analytics, a 7-day consistency weekly matrix, and live authenticated dashboard widget integration.
+
+#### Added
+- `src/features/habits/types/index.ts` — Habit domain types (`Habit`, `HabitLog`, `HabitWithLogs`, `HabitSummaryItem`, `HabitStats`, `CreateHabitInput`, `UpdateHabitInput`, `HabitFrequency`, `WeekDayInfo`)
+- `src/features/habits/constants/domain.ts` — Categories, icon map, color identities, and Tailwind color token mappings
+- `src/features/habits/constants/mockData.ts` — Default seeded habit constants
+- `src/features/habits/utils/streak.ts` — Pure functions for consecutive active streaks, all-time best streaks, and daily completion checks
+- `src/features/habits/utils/progress.ts` — 7-day current week intervals and completion rate utilities
+- `src/services/habit.service.ts` — Prisma service layer with user ownership validation, soft delete filtering, upsert daily logging, and summary aggregation
+- `src/features/habits/actions/index.ts` — Server Actions (`createHabitAction`, `updateHabitAction`, `deleteHabitAction`, `toggleHabitAction`) with NextAuth session verification and path revalidation
+- `src/features/habits/components/HabitHeader.tsx` — Category filters, completion stats badge, and new habit modal trigger
+- `src/features/habits/components/HabitStatsBar.tsx` — Top metrics bar (today's completion progress, best active streak, total streaks, active habits count)
+- `src/features/habits/components/HabitWeeklyMatrix.tsx` — 7-day interactive consistency matrix displaying completion bubbles and streak flame badges
+- `src/features/habits/components/HabitCard.tsx` — Habit card with category tag, flame streak counter, 7-day mini heatmap, one-click check-in, and options dropdown
+- `src/features/habits/components/HabitIcon.tsx` — Reusable Lucide icon renderer for dynamic habit icons
+- `src/features/habits/components/CreateHabitDialog.tsx` — Modal supporting habit title, description, category, color accent, icon picker, frequency, and target days
+- `src/features/habits/components/EditHabitDialog.tsx` — Modal for editing habit details and archiving
+- `src/features/habits/components/HabitsView.tsx` — Client layout orchestrating header, stats, weekly matrix, category filtering, and habit cards
+- `Habit` and `HabitLog` models in Prisma schema with `@@unique([habitId, date])` and relations to `User`
+
+#### Modified
+- `prisma/schema.prisma` — Added `Habit` and `HabitLog` models, `habits` relation on `User`
+- `prisma/seed.ts` — Added deterministic habit records and 100 historical `HabitLog` entries for `user-dev-1`
+- `src/app/(app)/habits/page.tsx` — Replaced placeholder with authenticated Server Component fetching live habit list and stats
+- `src/app/(app)/dashboard/page.tsx` — Connected dashboard to `getHabitSummary(session.user.id)`
+- `src/features/dashboard/components/HabitSummary.tsx` — Replaced static mock data with live authenticated habit summary data
+
+---
+
 ## [0.6.0] - 2026-08-08
 
 ### Milestone 6: Calendar
