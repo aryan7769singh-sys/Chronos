@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-import {
-  MOCK_PROJECTS,
-  getTasksByProject,
-} from "@/features/tasks/constants/mockData";
+import { getProjectById } from "@/services/project.service";
+import { getTasksByProjectId } from "@/services/task.service";
 import { ProjectDetails } from "@/features/tasks/components/projects/ProjectDetails";
 
 interface ProjectPageProps {
@@ -11,7 +9,7 @@ interface ProjectPageProps {
 
 export async function generateMetadata({ params }: ProjectPageProps) {
   const { projectId } = await params;
-  const project = MOCK_PROJECTS.find((p) => p.id === projectId);
+  const project = await getProjectById(projectId);
   return {
     title: project ? `${project.name} — Chronos` : "Project — Chronos",
   };
@@ -20,10 +18,12 @@ export async function generateMetadata({ params }: ProjectPageProps) {
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { projectId } = await params;
 
-  const project = MOCK_PROJECTS.find((p) => p.id === projectId);
-  if (!project) notFound();
+  const [project, tasks] = await Promise.all([
+    getProjectById(projectId),
+    getTasksByProjectId(projectId),
+  ]);
 
-  const tasks = getTasksByProject(projectId);
+  if (!project) notFound();
 
   return (
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto">

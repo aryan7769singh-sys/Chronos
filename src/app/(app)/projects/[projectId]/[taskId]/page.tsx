@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
-import {
-  MOCK_PROJECTS,
-  MOCK_TASKS,
-  getSubtasksByTask,
-} from "@/features/tasks/constants/mockData";
+import { getProjectById } from "@/services/project.service";
+import { getTaskById, getSubtasksByTaskId } from "@/services/task.service";
 import { TaskDetails } from "@/features/tasks/components/tasks/TaskDetails";
 
 interface TaskPageProps {
@@ -11,8 +8,8 @@ interface TaskPageProps {
 }
 
 export async function generateMetadata({ params }: TaskPageProps) {
-  const { taskId } = await params;
-  const task = MOCK_TASKS.find((t) => t.id === taskId);
+  const { taskId, projectId } = await params;
+  const task = await getTaskById(projectId, taskId);
   return {
     title: task ? `${task.title} — Chronos` : "Task — Chronos",
   };
@@ -21,13 +18,13 @@ export async function generateMetadata({ params }: TaskPageProps) {
 export default async function TaskPage({ params }: TaskPageProps) {
   const { projectId, taskId } = await params;
 
-  const project = MOCK_PROJECTS.find((p) => p.id === projectId);
-  if (!project) notFound();
+  const [project, task, subtasks] = await Promise.all([
+    getProjectById(projectId),
+    getTaskById(projectId, taskId),
+    getSubtasksByTaskId(taskId),
+  ]);
 
-  const task = MOCK_TASKS.find((t) => t.id === taskId && t.projectId === projectId);
-  if (!task) notFound();
-
-  const subtasks = getSubtasksByTask(taskId);
+  if (!project || !task) notFound();
 
   return (
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto">
