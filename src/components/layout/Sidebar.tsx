@@ -120,7 +120,7 @@ function SidebarNavItem({ item, isCollapsed, isActive }: SidebarNavItemProps) {
     return (
       <TooltipProvider delay={300}>
         <Tooltip>
-          <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+          <TooltipTrigger>{linkContent}</TooltipTrigger>
           <TooltipContent side="right">
             <span>{item.label}</span>
             {item.soon && (

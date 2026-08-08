@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
 import { cn } from "@/lib/utils"
@@ -61,7 +62,13 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   )
 }
 
-function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
+function ProgressValue({
+  className,
+  children,
+  ...props
+}: Omit<ProgressPrimitive.Value.Props, "children"> & {
+  children?: React.ReactNode
+}) {
   return (
     <ProgressPrimitive.Value
       className={cn(
@@ -70,7 +77,10 @@ function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
       )}
       data-slot="progress-value"
       {...props}
-    />
+    >
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {children as any}
+    </ProgressPrimitive.Value>
   )
 }
 
