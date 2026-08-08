@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getProjectById } from "@/services/project.service";
 import { getTaskById, getSubtasksByTaskId } from "@/services/task.service";
+import { getNotesByTaskId } from "@/services/note.service";
 import { TaskDetails } from "@/features/tasks/components/tasks/TaskDetails";
 
 interface TaskPageProps {
@@ -19,18 +20,20 @@ export async function generateMetadata({ params }: TaskPageProps) {
 export default async function TaskPage({ params }: TaskPageProps) {
   const { projectId, taskId } = await params;
   const session = await auth();
+  const userId = session?.user?.id;
 
-  const [project, task, subtasks] = await Promise.all([
-    getProjectById(projectId, session?.user?.id),
-    getTaskById(projectId, taskId, session?.user?.id),
-    getSubtasksByTaskId(taskId, session?.user?.id),
+  const [project, task, subtasks, taskNotes] = await Promise.all([
+    getProjectById(projectId, userId),
+    getTaskById(projectId, taskId, userId),
+    getSubtasksByTaskId(taskId, userId),
+    userId ? getNotesByTaskId(userId, taskId) : Promise.resolve([]),
   ]);
 
   if (!project || !task) notFound();
 
   return (
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto">
-      <TaskDetails task={task} project={project} subtasks={subtasks} />
+      <TaskDetails task={task} project={project} subtasks={subtasks} taskNotes={taskNotes} />
     </div>
   );
 }

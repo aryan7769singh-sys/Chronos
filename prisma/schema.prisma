@@ -67,6 +67,7 @@ model User {
   calendarEvents CalendarEvent[]
   habits         Habit[]
   focusSessions  FocusSession[]
+  notes          Note[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -129,6 +130,7 @@ model Project {
   tasks          Task[]
   calendarEvents CalendarEvent[]
   focusSessions  FocusSession[]
+  notes          Note[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -159,6 +161,7 @@ model Task {
   subtasks          Subtask[]
   calendarEvents    CalendarEvent[]
   focusSessions     FocusSession[]
+  attachedNotes     Note[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -286,6 +289,35 @@ model FocusSession {
   deletedAt      DateTime?
 
   @@index([userId, createdAt])
+  @@index([projectId])
+  @@index([taskId])
+}
+
+// ---------------------------------------------------------------------------
+// Notes & Knowledge Hub Domain Models
+// ---------------------------------------------------------------------------
+
+/// A lightweight knowledge note linked to productivity workflows.
+/// Strictly owned by a User; optionally linked to a Project and Task.
+model Note {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  taskId    String?
+  task      Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  title     String
+  content   String    @default("")
+  category  String    @default("general")
+  color     String    @default("violet")
+  pinned    Boolean   @default(false)
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId, updatedAt])
   @@index([projectId])
   @@index([taskId])
 }

@@ -851,6 +851,67 @@ async function main() {
     });
   }
 
+  // --- Notes -------------------------------------------------------------
+
+  const noteSeeds = [
+    {
+      id: "note-1",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      taskId: "task-1-1",
+      title: "Milestone Architecture & Module Boundaries",
+      content:
+        "Key principles for Chronos:\n- Feature-first structure\n- Server Actions for mutations\n- Page → Service → Prisma flow\n- Zero raw Prisma calls in UI components\n- Strict user tenant isolation",
+      category: "project",
+      color: "violet",
+      pinned: true,
+      archived: false,
+    },
+    {
+      id: "note-2",
+      userId: "user-dev-1",
+      projectId: "proj-1",
+      title: "Productivity Intelligence Metrics & Formulae",
+      content:
+        "Notes on analytics metrics:\n- Estimation Accuracy: Math.min(actual, est) / Math.max(actual, est)\n- Habit Adherence: expected completions scaled by targetDaysPerWeek / 7\n- Baseline comparisons when previous period is zero",
+      category: "research",
+      color: "cyan",
+      pinned: true,
+      archived: false,
+    },
+    {
+      id: "note-3",
+      userId: "user-dev-1",
+      projectId: "proj-2",
+      title: "Design System Tokens & Micro-interactions",
+      content:
+        "Palette tokens: HSL tailwind colors with dark mode contrast.\nIcons: Lucide React icons.\nTypography: Inter font family.\nAnimations: Smooth transitions and hover scaling.",
+      category: "idea",
+      color: "blue",
+      pinned: false,
+      archived: false,
+    },
+    {
+      id: "note-4",
+      userId: "user-dev-1",
+      title: "Weekly Reflection & Daily Journal",
+      content:
+        "Consistently completing deep work blocks during morning energy windows. Focus on closing high-priority backlog items.",
+      category: "journal",
+      color: "rose",
+      pinned: false,
+      archived: false,
+    },
+  ];
+
+  for (const n of noteSeeds) {
+    await prisma.note.upsert({
+      where: { id: n.id },
+      update: {},
+      create: n,
+    });
+  }
+
   console.log("✅ Seed complete.");
 }
 

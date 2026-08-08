@@ -13,11 +13,14 @@ import {
 } from "../../constants/domain";
 import { SubtaskChecklist } from "./SubtaskChecklist";
 import type { Task, Project, Subtask } from "../../types";
+import type { NoteWithRelations } from "@/features/notes/types";
+import { TaskNotesSection } from "@/features/notes/components/TaskNotesSection";
 
 interface TaskDetailsProps {
   task: Task;
   project: Project;
   subtasks: Subtask[];
+  taskNotes?: NoteWithRelations[];
 }
 
 function formatDuration(minutes: number): string {
@@ -29,7 +32,7 @@ function formatDuration(minutes: number): string {
   return `${h}h ${m}m`;
 }
 
-export function TaskDetails({ task, project, subtasks }: TaskDetailsProps) {
+export function TaskDetails({ task, project, subtasks, taskNotes = [] }: TaskDetailsProps) {
   const colors = PROJECT_COLOR_CLASSES[project.color];
   const ProjectIcon = PROJECT_ICON_MAP[project.icon] ?? FALLBACK_ICON;
 
@@ -129,6 +132,7 @@ export function TaskDetails({ task, project, subtasks }: TaskDetailsProps) {
               projectId={project.id}
               taskId={task.id}
             />
+            <TaskNotesSection notes={taskNotes} taskId={task.id} />
           </div>
 
           {/* Notes */}

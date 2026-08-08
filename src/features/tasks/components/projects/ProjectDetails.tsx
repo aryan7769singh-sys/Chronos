@@ -28,13 +28,16 @@ import {
 import { TaskList } from "../tasks/TaskList";
 import { CreateTaskDialog } from "../tasks/CreateTaskDialog";
 import type { Project, Task } from "../../types";
+import type { NoteWithRelations } from "@/features/notes/types";
+import { ProjectNotesSection } from "@/features/notes/components/ProjectNotesSection";
 
 interface ProjectDetailsProps {
   project: Project;
   tasks: Task[];
+  projectNotes?: NoteWithRelations[];
 }
 
-export function ProjectDetails({ project, tasks }: ProjectDetailsProps) {
+export function ProjectDetails({ project, tasks, projectNotes = [] }: ProjectDetailsProps) {
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 
   const colors = PROJECT_COLOR_CLASSES[project.color];
@@ -149,6 +152,7 @@ export function ProjectDetails({ project, tasks }: ProjectDetailsProps) {
               </Button>
             </div>
             <TaskList tasks={tasks} projectId={project.id} />
+            <ProjectNotesSection notes={projectNotes} projectId={project.id} />
           </div>
 
           {/* Right: Project metadata sidebar */}

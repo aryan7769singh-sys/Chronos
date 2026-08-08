@@ -5,6 +5,7 @@ import {
   getTodaysFocusTask,
   getFocusSummary,
 } from "@/services/focus.service";
+import { getRecentNotes } from "@/services/note.service";
 import { WelcomeHero } from "@/features/dashboard/components/WelcomeHero";
 import { TodaysFocus } from "@/features/dashboard/components/TodaysFocus";
 import { TodaysTasks } from "@/features/dashboard/components/TodaysTasks";
@@ -12,6 +13,7 @@ import { UpcomingDeadlines } from "@/features/dashboard/components/UpcomingDeadl
 import { MiniCalendar } from "@/features/dashboard/components/MiniCalendar";
 import { HabitSummary } from "@/features/dashboard/components/HabitSummary";
 import { FocusCard } from "@/features/dashboard/components/FocusCard";
+import { RecentNotes } from "@/features/dashboard/components/RecentNotes";
 import { QuickActions } from "@/features/dashboard/components/QuickActions";
 
 export const metadata = { title: "Dashboard — Chronos" };
@@ -19,7 +21,7 @@ export const metadata = { title: "Dashboard — Chronos" };
 export default async function DashboardPage() {
   const session = await auth();
 
-  const [habits, todaysTasks, upcomingDeadlines, focusTask, focusSummary] =
+  const [habits, todaysTasks, upcomingDeadlines, focusTask, focusSummary, recentNotes] =
     session?.user?.id
       ? await Promise.all([
           getHabitSummary(session.user.id),
@@ -27,6 +29,7 @@ export default async function DashboardPage() {
           getUpcomingDeadlines(session.user.id),
           getTodaysFocusTask(session.user.id),
           getFocusSummary(session.user.id),
+          getRecentNotes(session.user.id, 4),
         ])
       : [
           [],
@@ -39,6 +42,7 @@ export default async function DashboardPage() {
             dailyGoalMinutes: 120,
             currentStreak: 0,
           },
+          [],
         ];
 
   return (
@@ -59,6 +63,7 @@ export default async function DashboardPage() {
         <div className="space-y-4 md:space-y-6">
           <MiniCalendar />
           <HabitSummary habits={habits} />
+          <RecentNotes notes={recentNotes} />
           <FocusCard summary={focusSummary} />
           <QuickActions />
         </div>
