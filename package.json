@@ -2,6 +2,7 @@
   "name": "chronos",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +10,23 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "electron:dev": "concurrently \"npm run dev\" \"electron .\"",
+    "electron:build": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.chronos.desktop",
+    "productName": "Chronos Desktop HUD",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "electron/**/*",
+      "desktop-config.json"
+    ]
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -47,6 +64,9 @@
     "@types/pg": "^8.21.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.4",
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "prisma": "^7.9.1",

@@ -1,0 +1,21 @@
+{
+  "appName": "Chronos Command HUD",
+  "version": "0.14.0",
+  "targetUrl": "http://localhost:3000/overlay",
+  "window": {
+    "width": 420,
+    "height": 680,
+    "frame": false,
+    "transparent": true,
+    "alwaysOnTop": true,
+    "resizable": true,
+    "skipTaskbar": false,
+    "webPreferences": {
+      "nodeIntegration": false,
+      "contextIsolation": true
+    }
+  },
+  "shortcut": {
+    "toggleKey": "CommandOrControl+Shift+C"
+  }
+}

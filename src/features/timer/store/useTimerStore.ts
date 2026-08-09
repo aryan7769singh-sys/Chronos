@@ -55,6 +55,49 @@ function getDurationForMode(mode: TimerMode, settings: TimerSettings): number {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Cross-Tab & Cross-Window BroadcastChannel Timer Synchronization
+// ---------------------------------------------------------------------------
+
+const SYNC_CHANNEL = "chronos-timer-broadcast";
+const SENDER_ID =
+  typeof window !== "undefined"
+    ? Math.random().toString(36).substring(2, 9)
+    : "server";
+
+let timerChannel: BroadcastChannel | null = null;
+
+if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+  try {
+    timerChannel = new BroadcastChannel(SYNC_CHANNEL);
+  } catch {
+    // BroadcastChannel unsupported or blocked
+  }
+}
+
+function broadcastState(actionType: string, state: Partial<TimerStoreState>) {
+  if (!timerChannel) return;
+  try {
+    timerChannel.postMessage({
+      senderId: SENDER_ID,
+      actionType,
+      state: {
+        mode: state.mode,
+        status: state.status,
+        targetDuration: state.targetDuration,
+        timeLeft: state.timeLeft,
+        elapsedSeconds: state.elapsedSeconds,
+        pomodorosCompleted: state.pomodorosCompleted,
+        activeTask: state.activeTask,
+        startTimestamp: state.startTimestamp,
+        accumulatedElapsed: state.accumulatedElapsed,
+      },
+    });
+  } catch {
+    // ignore
+  }
+}
+
 export const useTimerStore = create<TimerStoreState>((set, get) => ({
   mode: "pomodoro",
   status: "idle",
@@ -77,18 +120,24 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
         ? customSeconds
         : getDurationForMode(newMode, settings);
 
-    set({
+    const newState = {
       mode: newMode,
-      status: "idle",
+      status: "idle" as TimerStatus,
       targetDuration: duration,
       timeLeft: duration,
       elapsedSeconds: 0,
       startTimestamp: null,
       accumulatedElapsed: 0,
-    });
+    };
+
+    set(newState);
+    broadcastState("STATE_UPDATE", get());
   },
 
-  setActiveTask: (task) => set({ activeTask: task }),
+  setActiveTask: (task) => {
+    set({ activeTask: task });
+    broadcastState("STATE_UPDATE", get());
+  },
 
   start: () => {
     const { status } = get();
@@ -98,6 +147,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
       status: "running",
       startTimestamp: Date.now(),
     });
+    broadcastState("STATE_UPDATE", get());
   },
 
   pause: () => {
@@ -112,6 +162,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
       startTimestamp: null,
       accumulatedElapsed: totalElapsed,
     });
+    broadcastState("STATE_UPDATE", get());
   },
 
   reset: () => {
@@ -127,6 +178,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
       startTimestamp: null,
       accumulatedElapsed: 0,
     });
+    broadcastState("STATE_UPDATE", get());
   },
 
   skip: () => {
@@ -153,6 +205,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
       startTimestamp: null,
       accumulatedElapsed: 0,
     });
+    broadcastState("STATE_UPDATE", get());
   },
 
   tick: () => {
@@ -188,7 +241,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
         startTimestamp: null,
         accumulatedElapsed: state.targetDuration,
       });
-
+      broadcastState("STATE_UPDATE", get());
       return true;
     }
 
@@ -211,6 +264,7 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
       targetDuration: newTarget,
       timeLeft: newRemaining,
     });
+    broadcastState("STATE_UPDATE", get());
   },
 
   setZenMode: (enabled) => set({ isZenMode: enabled }),
@@ -224,3 +278,56 @@ export const useTimerStore = create<TimerStoreState>((set, get) => ({
 
   setIsSubmitting: (submitting) => set({ isSubmitting: submitting }),
 }));
+
+// Synchronize incoming BroadcastChannel messages across contexts
+if (timerChannel) {
+  timerChannel.onmessage = (event) => {
+    const data = event.data;
+    if (!data || data.senderId === SENDER_ID) return;
+
+    if (data.actionType === "SYNC_REQUEST") {
+      const current = useTimerStore.getState();
+      broadcastState("STATE_UPDATE", current);
+      return;
+    }
+
+    if (data.actionType === "STATE_UPDATE" && data.state) {
+      const incoming = data.state;
+
+      // Calculate time reconciliation if session is running
+      let remaining = incoming.timeLeft;
+      let currentElapsed = incoming.elapsedSeconds;
+      if (incoming.status === "running" && incoming.startTimestamp) {
+        const segElapsed = Math.floor(
+          (Date.now() - incoming.startTimestamp) / 1000
+        );
+        currentElapsed = incoming.accumulatedElapsed + segElapsed;
+        if (incoming.mode !== "stopwatch") {
+          remaining = Math.max(0, incoming.targetDuration - currentElapsed);
+        }
+      }
+
+      useTimerStore.setState({
+        mode: incoming.mode,
+        status: incoming.status,
+        targetDuration: incoming.targetDuration,
+        timeLeft: remaining,
+        elapsedSeconds: currentElapsed,
+        pomodorosCompleted: incoming.pomodorosCompleted,
+        activeTask: incoming.activeTask,
+        startTimestamp: incoming.startTimestamp,
+        accumulatedElapsed: incoming.accumulatedElapsed,
+      });
+    }
+  };
+
+  // Broadcast initial request for active state reconciliation
+  try {
+    timerChannel.postMessage({
+      senderId: SENDER_ID,
+      actionType: "SYNC_REQUEST",
+    });
+  } catch {
+    // ignore
+  }
+}

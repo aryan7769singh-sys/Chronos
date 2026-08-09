@@ -3,12 +3,14 @@
 import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import {
   Bell,
   Menu,
   Moon,
   Search,
   Sun,
+  Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/UserMenu";
@@ -155,6 +157,18 @@ export function Header({ onMenuClick, user }: HeaderProps) {
         >
           <Bell className="size-4" />
         </Button>
+
+        {/* Command HUD Launcher */}
+        <Link
+          id="header-hud-launcher"
+          href="/overlay"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center size-8 rounded-lg text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 transition-colors"
+          title="Open Command HUD Overlay"
+        >
+          <Monitor className="size-4" />
+        </Link>
 
         {/* User menu with avatar & sign out */}
         <UserMenu user={user} />
