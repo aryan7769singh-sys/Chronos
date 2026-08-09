@@ -1,13 +1,17 @@
 "use client";
 
 import { getMonthMatrix, getItemsForDay } from "../../utils/dateGrid";
+import { isSameDay, parseISO } from "date-fns";
 import { MonthDayCell } from "./MonthDayCell";
 import type { CalendarItem, CalendarEvent } from "../../types";
+import type { TimeBlockWithRelations } from "@/features/planning/types";
 
 interface MonthViewProps {
   currentDate: Date;
   items: CalendarItem[];
+  timeBlocks?: TimeBlockWithRelations[];
   onEventClick: (event: CalendarEvent) => void;
+  onTimeBlockClick?: (block: TimeBlockWithRelations) => void;
   onDayClick: (day: Date) => void;
 }
 
@@ -16,7 +20,9 @@ const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export function MonthView({
   currentDate,
   items,
+  timeBlocks = [],
   onEventClick,
+  onTimeBlockClick,
   onDayClick,
 }: MonthViewProps) {
   const days = getMonthMatrix(currentDate);
@@ -40,13 +46,22 @@ export function MonthView({
       <div className="grid grid-cols-7 border-l border-t border-border/40 bg-background/50">
         {days.map((day) => {
           const dayItems = getItemsForDay(items, day);
+          const dayBlocks = timeBlocks.filter((b) => {
+            try {
+              return isSameDay(parseISO(b.startTime), day);
+            } catch {
+              return false;
+            }
+          });
           return (
             <MonthDayCell
               key={day.toISOString()}
               day={day}
               currentDate={currentDate}
               items={dayItems}
+              timeBlocks={dayBlocks}
               onEventClick={onEventClick}
+              onTimeBlockClick={onTimeBlockClick}
               onDayClick={onDayClick}
             />
           );

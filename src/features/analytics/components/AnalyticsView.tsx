@@ -7,6 +7,7 @@ import { TaskVelocitySection } from "./TaskVelocitySection";
 import { HabitConsistencySection } from "./HabitConsistencySection";
 import { ProjectAllocationSection } from "./ProjectAllocationSection";
 import { ProductivityInsightsCard } from "./ProductivityInsightsCard";
+import { PlanningAnalyticsSection } from "./PlanningAnalyticsSection";
 import type { AnalyticsData } from "../types";
 
 interface AnalyticsViewProps {
@@ -39,17 +40,20 @@ export function AnalyticsView({ data }: AnalyticsViewProps) {
         focus={data.focus}
       />
 
-      {/* 5. Task Velocity & Priority Distribution */}
+      {/* 5. Planning & Time Blocking */}
+      <PlanningAnalyticsSection planning={data.planning} />
+
+      {/* 6. Task Velocity & Priority Distribution */}
       <TaskVelocitySection
         tasks={data.tasks}
       />
 
-      {/* 6. Habit Consistency & Streaks */}
+      {/* 7. Habit Consistency & Streaks */}
       <HabitConsistencySection
         habits={data.habits}
       />
 
-      {/* 7. Project Time Investment Allocation */}
+      {/* 8. Project Time Investment Allocation */}
       <ProjectAllocationSection
         projects={data.projects}
       />

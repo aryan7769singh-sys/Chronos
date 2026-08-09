@@ -19,6 +19,10 @@ interface FocusViewProps {
   recentSessions: FocusSession[];
   summary: FocusSummary;
   initialTask?: FocusTaskInfo | null;
+  /** Planned duration from a linked TimeBlock (minutes) — displayed as context only */
+  plannedDurationMinutes?: number;
+  /** ID of the linked TimeBlock, if started from a time block */
+  blockId?: string;
 }
 
 export function FocusView({
@@ -26,6 +30,7 @@ export function FocusView({
   recentSessions,
   summary,
   initialTask,
+  plannedDurationMinutes,
 }: FocusViewProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -140,6 +145,14 @@ export function FocusView({
               Execute deep work sessions and track your focus time.
             </p>
           </div>
+
+          {/* Time Block context badge — informational only */}
+          {plannedDurationMinutes && plannedDurationMinutes > 0 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs text-violet-600 dark:text-violet-400 font-medium">
+              <span className="size-1.5 rounded-full bg-violet-500 inline-block" />
+              Planned block: {plannedDurationMinutes}m
+            </div>
+          )}
         </div>
 
         {/* 2-Column Responsive Grid */}

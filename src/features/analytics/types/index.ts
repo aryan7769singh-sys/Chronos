@@ -1,6 +1,8 @@
 import type { ProjectColor, Priority } from "@/features/tasks/types";
 import type { TimerMode } from "@/features/timer/types";
+import type { PlanningStats } from "@/features/planning/types";
 
+export type { PlanningStats };
 export type AnalyticsTimeRange = "7d" | "30d" | "90d" | "all";
 
 export interface AnalyticsDateInterval {
@@ -146,6 +148,7 @@ export interface AnalyticsData {
     totalActiveHabits: number;
   };
   projects: ProjectTimeAllocation[];
+  planning: PlanningStats;
   insights: ProductivityInsight[];
   hasSufficientData: boolean;
 }

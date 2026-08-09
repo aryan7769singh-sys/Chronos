@@ -46,6 +46,7 @@ import {
   TIMER_MODE_COLORS,
   TIMER_MODE_LABELS,
 } from "@/features/timer/constants/timer";
+import { getPlanningStats } from "@/services/planning.service";
 
 // ---------------------------------------------------------------------------
 // Date Interval Helper
@@ -755,6 +756,8 @@ export async function getAnalyticsData(
     }
   }
 
+  const planningStats = await getPlanningStats(userId, interval.startDate ? new Date(interval.startDate) : new Date(0), new Date(interval.endDate));
+
   return {
     timeRange,
     interval,
@@ -786,6 +789,7 @@ export async function getAnalyticsData(
       totalActiveHabits: totalHabitsCount,
     },
     projects: projectAllocations,
+    planning: planningStats,
     insights,
     hasSufficientData,
   };

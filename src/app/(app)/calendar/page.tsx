@@ -12,6 +12,7 @@ import {
   isValid,
 } from "date-fns";
 import { getCalendarFeed } from "@/services/calendar.service";
+import { getTimeBlocks } from "@/services/planning.service";
 import { getAllProjects } from "@/services/project.service";
 import { prisma } from "@/lib/prisma";
 import { CalendarView } from "@/features/calendar/components/CalendarView";
@@ -70,9 +71,10 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
     rangeEnd = endOfDay(targetDate);
   }
 
-  // Query only the required date range for the authenticated user
-  const [calendarItems, projects, userTasks] = await Promise.all([
+  // Fetch CalendarEvents, TimeBlocks, projects, and tasks in parallel
+  const [calendarItems, timeBlocks, projects, userTasks] = await Promise.all([
     getCalendarFeed(session.user.id, rangeStart, rangeEnd),
+    getTimeBlocks(session.user.id, rangeStart, rangeEnd),
     getAllProjects(session.user.id),
     prisma.task.findMany({
       where: {
@@ -126,6 +128,7 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
         initialDateStr={initialDateStr}
         initialView={viewMode}
         items={calendarItems}
+        timeBlocks={timeBlocks}
         projects={projects}
         tasks={mappedTasks}
       />

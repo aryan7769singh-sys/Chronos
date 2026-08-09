@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Clock, Tag, FileText, ArrowRight } from "lucide-react";
+import { CalendarDays, Clock, Tag, FileText, ArrowRight, Play } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +12,7 @@ import {
   FALLBACK_ICON,
 } from "../../constants/domain";
 import { SubtaskChecklist } from "./SubtaskChecklist";
+import { ScheduleTaskButton } from "./ScheduleTaskButton";
 import type { Task, Project, Subtask } from "../../types";
 import type { NoteWithRelations } from "@/features/notes/types";
 import { TaskNotesSection } from "@/features/notes/components/TaskNotesSection";
@@ -21,6 +22,8 @@ interface TaskDetailsProps {
   project: Project;
   subtasks: Subtask[];
   taskNotes?: NoteWithRelations[];
+  allProjects?: Project[];
+  allTasks?: Task[];
 }
 
 function formatDuration(minutes: number): string {
@@ -32,7 +35,7 @@ function formatDuration(minutes: number): string {
   return `${h}h ${m}m`;
 }
 
-export function TaskDetails({ task, project, subtasks, taskNotes = [] }: TaskDetailsProps) {
+export function TaskDetails({ task, project, subtasks, taskNotes = [], allProjects = [], allTasks = [] }: TaskDetailsProps) {
   const colors = PROJECT_COLOR_CLASSES[project.color];
   const ProjectIcon = PROJECT_ICON_MAP[project.icon] ?? FALLBACK_ICON;
 
@@ -80,6 +83,28 @@ export function TaskDetails({ task, project, subtasks, taskNotes = [] }: TaskDet
               >
                 {task.title}
               </h1>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                {task.status !== "done" && task.status !== "cancelled" && (
+                  <>
+                    <ScheduleTaskButton
+                      task={task}
+                      allProjects={allProjects}
+                      allTasks={allTasks}
+                    />
+                    <Link
+                      href={`/focus?taskId=${task.id}`}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      )}
+                    >
+                      <Play className="size-3 fill-current" />
+                      Focus
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">

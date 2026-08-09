@@ -68,6 +68,7 @@ model User {
   habits         Habit[]
   focusSessions  FocusSession[]
   notes          Note[]
+  timeBlocks     TimeBlock[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -131,6 +132,7 @@ model Project {
   calendarEvents CalendarEvent[]
   focusSessions  FocusSession[]
   notes          Note[]
+  timeBlocks     TimeBlock[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -162,6 +164,7 @@ model Task {
   calendarEvents    CalendarEvent[]
   focusSessions     FocusSession[]
   attachedNotes     Note[]
+  timeBlocks        TimeBlock[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   /// Soft-delete timestamp. NULL means the record is active.
@@ -318,6 +321,50 @@ model Note {
   deletedAt DateTime?
 
   @@index([userId, updatedAt])
+  @@index([projectId])
+  @@index([taskId])
+}
+
+// ---------------------------------------------------------------------------
+// Planning & Time Blocking Domain Models
+// ---------------------------------------------------------------------------
+
+/// A planned time block representing WHEN a task/project is scheduled for work.
+/// Strictly owned by a User; optionally linked to a Project and Task.
+/// A TimeBlock represents PLANNED time; FocusSessions represent ACTUAL execution time.
+model TimeBlock {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  taskId      String?
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  title       String
+  description String   @default("")
+
+  /// Planned start timestamp
+  startTime   DateTime
+  /// Planned end timestamp
+  endTime     DateTime
+
+  /// One of: planned | in_progress | completed | skipped | cancelled
+  status      String   @default("planned")
+  /// Accent color key (matches ProjectColor)
+  color       String   @default("violet")
+  notes       String   @default("")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  /// Soft-delete timestamp. NULL means the record is active.
+  deletedAt   DateTime?
+
+  @@index([userId, startTime])
+  @@index([userId, endTime])
   @@index([projectId])
   @@index([taskId])
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -30,51 +31,57 @@ interface HeaderProps {
 }
 
 // ---------------------------------------------------------------------------
+// useIsMounted — returns false on SSR & hydration, true once mounted on client.
+// Uses useSyncExternalStore to avoid set-state-in-effect ESLint warnings.
+// ---------------------------------------------------------------------------
+
+const emptySubscribe = () => () => {};
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
+// ---------------------------------------------------------------------------
 // ThemeToggle — isolated so it only re-renders on theme change.
-// Uses resolvedTheme (undefined on SSR) as a mount guard to prevent
-// hydration mismatches without violating the set-state-in-effect lint rule.
+// Uses useIsMounted to ensure SSR and initial client hydration HTML match
+// perfectly, preventing hydration mismatch errors.
 // ---------------------------------------------------------------------------
 
 function ThemeToggle() {
+  const isMounted = useIsMounted();
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
-  // resolvedTheme is undefined until next-themes hydrates on the client.
-  // Render a neutral placeholder during SSR / before hydration.
-  if (resolvedTheme === undefined) {
-    return (
-      <Button
-        id="header-theme-toggle"
-        variant="ghost"
-        size="icon"
-        aria-label="Toggle theme"
-        className="text-muted-foreground hover:text-foreground"
-        suppressHydrationWarning
-      >
-        <Sun className="size-4" />
-      </Button>
-    );
-  }
+  const isDark = isMounted && resolvedTheme === "dark";
 
   return (
     <Button
       id="header-theme-toggle"
       variant="ghost"
       size="icon"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        isMounted
+          ? isDark
+            ? "Switch to light mode"
+            : "Switch to dark mode"
+          : "Toggle theme"
+      }
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="text-muted-foreground hover:text-foreground"
     >
       <Sun
         className={cn(
           "size-4 rotate-0 scale-100 transition-all duration-200",
-          isDark && "-rotate-90 scale-0"
+          isMounted && isDark && "-rotate-90 scale-0"
         )}
       />
       <Moon
         className={cn(
           "absolute size-4 rotate-90 scale-0 transition-all duration-200",
-          isDark && "rotate-0 scale-100"
+          isMounted && isDark && "rotate-0 scale-100"
         )}
       />
     </Button>

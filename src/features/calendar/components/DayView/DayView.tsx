@@ -5,6 +5,8 @@ import { format, parseISO } from "date-fns";
 import { getItemsForDay } from "../../utils/dateGrid";
 import { TaskDeadlineBadge } from "../TaskDeadlineBadge";
 import type { CalendarItem, CalendarEvent } from "../../types";
+import type { TimeBlockWithRelations } from "@/features/planning/types";
+import { TimeBlockCard } from "@/features/planning/components/TimeBlockCard";
 import {
   EVENT_COLOR_STYLES,
   EVENT_TYPE_ICONS,
@@ -18,7 +20,9 @@ import { cn } from "@/lib/utils";
 interface DayViewProps {
   currentDate: Date;
   items: CalendarItem[];
+  timeBlocks?: TimeBlockWithRelations[];
   onEventClick: (event: CalendarEvent) => void;
+  onTimeBlockClick?: (block: TimeBlockWithRelations) => void;
   onSlotClick: (date: Date) => void;
 }
 
@@ -28,7 +32,9 @@ const HOUR_HEIGHT = 68; // pixels per hour for comfortable reading
 export function DayView({
   currentDate,
   items,
+  timeBlocks = [],
   onEventClick,
+  onTimeBlockClick,
   onSlotClick,
 }: DayViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -58,7 +64,7 @@ export function DayView({
               {format(currentDate, "EEEE, MMMM d, yyyy")}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {timedEvents.length} scheduled events • {taskDeadlines.length} task deadlines
+              {timedEvents.length} events · {timeBlocks.length} time blocks · {taskDeadlines.length} deadlines
             </p>
           </div>
         </div>
@@ -137,7 +143,7 @@ export function DayView({
             />
           ))}
 
-          {/* Timed Event Cards */}
+          {/* CalendarEvent Cards */}
           {timedEvents.map(({ data: event }) => {
             const start = parseISO(event.startDate);
             const end = parseISO(event.endDate);
@@ -163,9 +169,11 @@ export function DayView({
                 style={{
                   top: `${top}px`,
                   height: `${height}px`,
+                  left: "0",
+                  right: "50%",
                 }}
                 className={cn(
-                  "absolute inset-x-2 p-2.5 rounded-lg border text-xs cursor-pointer z-10 transition-all hover:ring-1 hover:ring-ring shadow-xs flex flex-col justify-between",
+                  "absolute p-2.5 rounded-lg border text-xs cursor-pointer z-10 transition-all hover:ring-1 hover:ring-ring shadow-xs flex flex-col justify-between",
                   colorStyle.bg,
                   colorStyle.border,
                   "border-l-4"
@@ -221,6 +229,22 @@ export function DayView({
               </div>
             );
           })}
+
+          {/* TimeBlock Cards — right half of each slot to avoid overlap with events */}
+          {timeBlocks.map((block) => (
+            <div
+              key={block.id}
+              style={{ left: "50%", right: 0, position: "absolute" }}
+              className="absolute"
+            >
+              <TimeBlockCard
+                block={block}
+                hourHeight={HOUR_HEIGHT}
+                onClick={(b) => onTimeBlockClick?.(b)}
+                variant="full"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>

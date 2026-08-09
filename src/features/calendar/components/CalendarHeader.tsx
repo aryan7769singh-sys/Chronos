@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CalendarViewMode } from "../types";
 import { CALENDAR_VIEW_MODES } from "../constants/calendar";
@@ -14,6 +14,7 @@ interface CalendarHeaderProps {
   onToday: () => void;
   onViewChange: (mode: CalendarViewMode) => void;
   onNewEvent: () => void;
+  onNewTimeBlock: () => void;
 }
 
 export function CalendarHeader({
@@ -23,6 +24,7 @@ export function CalendarHeader({
   onToday,
   onViewChange,
   onNewEvent,
+  onNewTimeBlock,
 }: CalendarHeaderProps) {
   const title = formatNavigationTitle(currentDate, viewMode);
 
@@ -69,8 +71,8 @@ export function CalendarHeader({
         </div>
       </div>
 
-      {/* Right: View Switcher & + New Event */}
-      <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
+      {/* Right: View Switcher, + New Time Block & + New Event */}
+      <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end flex-wrap">
         {/* View Mode Toggle Pill */}
         <div className="flex items-center bg-muted/40 p-0.5 rounded-lg border border-border/60">
           {CALENDAR_VIEW_MODES.map((item) => {
@@ -93,6 +95,18 @@ export function CalendarHeader({
             );
           })}
         </div>
+
+        {/* New Time Block Button */}
+        <Button
+          id="cal-new-timeblock-btn"
+          size="sm"
+          variant="outline"
+          onClick={onNewTimeBlock}
+          className="h-8 gap-1.5 text-xs font-semibold border-violet-500/40 text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/60"
+        >
+          <Timer className="size-3.5" />
+          <span>Time Block</span>
+        </Button>
 
         {/* Create Event Button */}
         <Button

@@ -7,13 +7,14 @@ import {
   getFocusSummary,
   getTodaysFocusTask,
 } from "@/services/focus.service";
+import { getTimeBlockById } from "@/services/planning.service";
 import { FocusView } from "@/features/timer/components/FocusView";
 import type { FocusTaskInfo } from "@/features/timer/types";
 
 export const metadata = { title: "Focus — Chronos" };
 
 interface FocusPageProps {
-  searchParams: Promise<{ taskId?: string }>;
+  searchParams: Promise<{ taskId?: string; blockId?: string }>;
 }
 
 export default async function FocusPage({ searchParams }: FocusPageProps) {
@@ -22,7 +23,7 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
     redirect("/login");
   }
 
-  const { taskId } = await searchParams;
+  const { taskId, blockId } = await searchParams;
 
   // Parallel data fetching
   const [allTasks, recentSessions, summary] = await Promise.all([
@@ -49,6 +50,7 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
 
   // Resolve initial active task (URL query param vs default today's focus task)
   let initialTask: FocusTaskInfo | null = null;
+  let plannedDurationMinutes: number | null = null;
 
   if (taskId) {
     // Verify user ownership of the requested task
@@ -75,6 +77,28 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
     }
   }
 
+  // If blockId provided: look up the TimeBlock (ownership-checked), extract planned duration
+  if (blockId && session.user.id) {
+    const block = await getTimeBlockById(session.user.id, blockId);
+    if (block) {
+      // Extract planned duration from the time block
+      const start = new Date(block.startTime);
+      const end = new Date(block.endTime);
+      plannedDurationMinutes = Math.max(
+        Math.round((end.getTime() - start.getTime()) / 60000),
+        1
+      );
+
+      // If no taskId was given via URL but block has a linked task, use it
+      if (!initialTask && block.task) {
+        const taskFromBlock = focusTasks.find((t) => t.id === block.taskId);
+        if (taskFromBlock) {
+          initialTask = taskFromBlock;
+        }
+      }
+    }
+  }
+
   if (!initialTask) {
     initialTask = await getTodaysFocusTask(session.user.id);
   }
@@ -85,6 +109,8 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
       recentSessions={recentSessions}
       summary={summary}
       initialTask={initialTask}
+      plannedDurationMinutes={plannedDurationMinutes ?? undefined}
+      blockId={blockId}
     />
   );
 }

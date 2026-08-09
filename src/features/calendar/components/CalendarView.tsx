@@ -9,14 +9,18 @@ import { WeekView } from "./WeekView/WeekView";
 import { DayView } from "./DayView/DayView";
 import { EventFormDialog } from "./EventDialog/EventFormDialog";
 import { EventDetailModal } from "./EventDialog/EventDetailModal";
+import { TimeBlockDialog } from "@/features/planning/components/TimeBlockDialog";
+import { TimeBlockDetails } from "@/features/planning/components/TimeBlockDetails";
 import { navigateDate } from "../utils/dateGrid";
 import type { CalendarItem, CalendarEvent, CalendarViewMode } from "../types";
+import type { TimeBlockWithRelations } from "@/features/planning/types";
 import type { Project, Task } from "@/features/tasks/types";
 
 interface CalendarViewProps {
   initialDateStr: string; // "yyyy-MM-dd"
   initialView: CalendarViewMode;
   items: CalendarItem[];
+  timeBlocks: TimeBlockWithRelations[];
   projects: Project[];
   tasks: Task[];
 }
@@ -25,6 +29,7 @@ export function CalendarView({
   initialDateStr,
   initialView,
   items,
+  timeBlocks,
   projects,
   tasks,
 }: CalendarViewProps) {
@@ -32,11 +37,17 @@ export function CalendarView({
   const currentDate = parseISO(initialDateStr);
   const [viewMode, setViewMode] = useState<CalendarViewMode>(initialView);
 
-  // Dialog States
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  // ── CalendarEvent dialog state ──
+  const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
   const [selectedSlotDate, setSelectedSlotDate] = useState<Date | undefined>(undefined);
+
+  // ── TimeBlock dialog state ──
+  const [isTBDialogOpen, setIsTBDialogOpen] = useState(false);
+  const [isTBDetailOpen, setIsTBDetailOpen] = useState(false);
+  const [activeBlock, setActiveBlock] = useState<TimeBlockWithRelations | null>(null);
+  const [tbInitialDate, setTbInitialDate] = useState<Date | undefined>(undefined);
 
   // Synchronize date / view updates to URL search params
   const updateUrl = (date: Date, mode: CalendarViewMode) => {
@@ -58,39 +69,63 @@ export function CalendarView({
     updateUrl(currentDate, mode);
   };
 
-  const handleOpenCreate = (slotDate?: Date) => {
+  // ── CalendarEvent handlers ──
+  const handleOpenCreateEvent = (slotDate?: Date) => {
     setActiveEvent(null);
     setSelectedSlotDate(slotDate ?? currentDate);
-    setIsFormOpen(true);
+    setIsEventFormOpen(true);
   };
 
-  const handleOpenDetail = (event: CalendarEvent) => {
+  const handleOpenEventDetail = (event: CalendarEvent) => {
     setActiveEvent(event);
-    setIsDetailOpen(true);
+    setIsEventDetailOpen(true);
   };
 
-  const handleOpenEdit = (event: CalendarEvent) => {
+  const handleOpenEditEvent = (event: CalendarEvent) => {
     setActiveEvent(event);
     setSelectedSlotDate(new Date(event.startDate));
-    setIsFormOpen(true);
+    setIsEventFormOpen(true);
+  };
+
+  // ── TimeBlock handlers ──
+  const handleOpenCreateTimeBlock = (slotDate?: Date) => {
+    setActiveBlock(null);
+    setTbInitialDate(slotDate ?? currentDate);
+    setIsTBDialogOpen(true);
+  };
+
+  const handleOpenTimeBlockDetail = (block: TimeBlockWithRelations) => {
+    setActiveBlock(block);
+    setIsTBDetailOpen(true);
+  };
+
+  const handleOpenEditTimeBlock = (block: TimeBlockWithRelations) => {
+    setActiveBlock(block);
+    setIsTBDetailOpen(false);
+    setIsTBDialogOpen(true);
   };
 
   const handleDayClick = (day: Date) => {
-    // When clicking a day in Month view, switch to Day view
     setViewMode("day");
     updateUrl(day, "day");
   };
 
+  // Slot click in Day/Week: open TimeBlock dialog pre-filled with time
+  const handleSlotClick = (slotDate: Date) => {
+    handleOpenCreateTimeBlock(slotDate);
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Calendar Header with Navigation and View Switcher */}
+      {/* Calendar Header with Navigation, View Switcher & Create buttons */}
       <CalendarHeader
         currentDate={currentDate}
         viewMode={viewMode}
         onNavigate={handleNavigate}
         onToday={handleToday}
         onViewChange={handleViewChange}
-        onNewEvent={() => handleOpenCreate()}
+        onNewEvent={() => handleOpenCreateEvent()}
+        onNewTimeBlock={() => handleOpenCreateTimeBlock()}
       />
 
       {/* Main View Grid based on viewMode */}
@@ -98,7 +133,9 @@ export function CalendarView({
         <MonthView
           currentDate={currentDate}
           items={items}
-          onEventClick={handleOpenDetail}
+          timeBlocks={timeBlocks}
+          onEventClick={handleOpenEventDetail}
+          onTimeBlockClick={handleOpenTimeBlockDetail}
           onDayClick={handleDayClick}
         />
       )}
@@ -107,8 +144,10 @@ export function CalendarView({
         <WeekView
           currentDate={currentDate}
           items={items}
-          onEventClick={handleOpenDetail}
-          onSlotClick={handleOpenCreate}
+          timeBlocks={timeBlocks}
+          onEventClick={handleOpenEventDetail}
+          onTimeBlockClick={handleOpenTimeBlockDetail}
+          onSlotClick={handleSlotClick}
         />
       )}
 
@@ -116,27 +155,45 @@ export function CalendarView({
         <DayView
           currentDate={currentDate}
           items={items}
-          onEventClick={handleOpenDetail}
-          onSlotClick={handleOpenCreate}
+          timeBlocks={timeBlocks}
+          onEventClick={handleOpenEventDetail}
+          onTimeBlockClick={handleOpenTimeBlockDetail}
+          onSlotClick={handleSlotClick}
         />
       )}
 
-      {/* Create / Edit Dialog */}
+      {/* ── CalendarEvent Dialogs ── */}
       <EventFormDialog
-        open={isFormOpen}
-        onOpenChange={setIsFormOpen}
+        open={isEventFormOpen}
+        onOpenChange={setIsEventFormOpen}
         event={activeEvent}
         initialDate={selectedSlotDate}
         projects={projects}
         tasks={tasks}
       />
 
-      {/* View Details Modal */}
       <EventDetailModal
-        open={isDetailOpen}
-        onOpenChange={setIsDetailOpen}
+        open={isEventDetailOpen}
+        onOpenChange={setIsEventDetailOpen}
         event={activeEvent}
-        onEdit={handleOpenEdit}
+        onEdit={handleOpenEditEvent}
+      />
+
+      {/* ── TimeBlock Dialogs ── */}
+      <TimeBlockDialog
+        open={isTBDialogOpen}
+        onOpenChange={setIsTBDialogOpen}
+        block={activeBlock}
+        initialDate={tbInitialDate}
+        projects={projects}
+        tasks={tasks}
+      />
+
+      <TimeBlockDetails
+        open={isTBDetailOpen}
+        onOpenChange={setIsTBDetailOpen}
+        block={activeBlock}
+        onEdit={handleOpenEditTimeBlock}
       />
     </div>
   );

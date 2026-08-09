@@ -1,17 +1,21 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { format, isToday, parseISO } from "date-fns";
+import { format, isToday, parseISO, isSameDay } from "date-fns";
 import { getWeekDays, getItemsForDay } from "../../utils/dateGrid";
 import { TaskDeadlineBadge } from "../TaskDeadlineBadge";
 import type { CalendarItem, CalendarEvent } from "../../types";
+import type { TimeBlockWithRelations } from "@/features/planning/types";
+import { TimeBlockCard } from "@/features/planning/components/TimeBlockCard";
 import { EVENT_COLOR_STYLES, EVENT_TYPE_ICONS } from "../../constants/calendar";
 import { cn } from "@/lib/utils";
 
 interface WeekViewProps {
   currentDate: Date;
   items: CalendarItem[];
+  timeBlocks?: TimeBlockWithRelations[];
   onEventClick: (event: CalendarEvent) => void;
+  onTimeBlockClick?: (block: TimeBlockWithRelations) => void;
   onSlotClick: (date: Date) => void;
 }
 
@@ -21,7 +25,9 @@ const HOUR_HEIGHT = 56; // pixels per hour
 export function WeekView({
   currentDate,
   items,
+  timeBlocks = [],
   onEventClick,
+  onTimeBlockClick,
   onSlotClick,
 }: WeekViewProps) {
   const days = getWeekDays(currentDate);
@@ -46,6 +52,9 @@ export function WeekView({
         {/* 7 Days Headers */}
         {days.map((day) => {
           const isCurrent = isToday(day);
+          const dayBlockCount = timeBlocks.filter((b) => {
+            try { return isSameDay(parseISO(b.startTime), day); } catch { return false; }
+          }).length;
           return (
             <div
               key={day.toISOString()}
@@ -67,6 +76,11 @@ export function WeekView({
               >
                 {format(day, "d")}
               </span>
+              {dayBlockCount > 0 && (
+                <span className="text-[9px] text-muted-foreground font-medium">
+                  {dayBlockCount}b
+                </span>
+              )}
             </div>
           );
         })}
@@ -152,6 +166,10 @@ export function WeekView({
             (i) => i.kind === "event" && !i.data.allDay
           ) as { kind: "event"; data: CalendarEvent }[];
 
+          const dayBlocks = timeBlocks.filter((b) => {
+            try { return isSameDay(parseISO(b.startTime), day); } catch { return false; }
+          });
+
           return (
             <div
               key={`grid-${day.toISOString()}`}
@@ -171,14 +189,14 @@ export function WeekView({
                 />
               ))}
 
-              {/* Timed Event Cards */}
+              {/* CalendarEvent Cards */}
               {timedEvents.map(({ data: event }) => {
                 const start = parseISO(event.startDate);
                 const end = parseISO(event.endDate);
 
                 const startMinutes = start.getHours() * 60 + start.getMinutes();
                 const endMinutes = end.getHours() * 60 + end.getMinutes();
-                const duration = Math.max(endMinutes - startMinutes, 30); // Min 30m display
+                const duration = Math.max(endMinutes - startMinutes, 30);
 
                 const top = (startMinutes / 60) * HOUR_HEIGHT;
                 const height = (duration / 60) * HOUR_HEIGHT;
@@ -197,10 +215,12 @@ export function WeekView({
                     style={{
                       top: `${top}px`,
                       height: `${height}px`,
+                      left: 0,
+                      right: dayBlocks.length > 0 ? "50%" : "4px",
                     }}
                     title={`${event.title} (${format(start, "h:mm a")} – ${format(end, "h:mm a")})`}
                     className={cn(
-                      "absolute inset-x-1 p-1.5 rounded-md border text-xs font-medium cursor-pointer overflow-hidden z-10 transition-all hover:ring-1 hover:ring-ring shadow-xs",
+                      "absolute p-1.5 rounded-md border text-xs font-medium cursor-pointer overflow-hidden z-10 transition-all hover:ring-1 hover:ring-ring shadow-xs",
                       colorStyle.bg,
                       colorStyle.border,
                       "border-l-3"
@@ -216,6 +236,28 @@ export function WeekView({
                   </div>
                 );
               })}
+
+              {/* TimeBlock Cards — right half (or full width when no events) */}
+              {dayBlocks.map((block) => (
+                <div
+                  key={block.id}
+                  className="absolute"
+                  style={{
+                    left: timedEvents.length > 0 ? "50%" : "2px",
+                    right: "2px",
+                    top: 0,
+                    bottom: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <TimeBlockCard
+                    block={block}
+                    hourHeight={HOUR_HEIGHT}
+                    onClick={(b) => onTimeBlockClick?.(b)}
+                    variant="compact"
+                  />
+                </div>
+              ))}
             </div>
           );
         })}
