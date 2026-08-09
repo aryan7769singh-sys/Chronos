@@ -8,6 +8,7 @@ import {
   getTodaysFocusTask,
 } from "@/services/focus.service";
 import { getTimeBlockById } from "@/services/planning.service";
+import { getUserSettings } from "@/services/settings.service";
 import { FocusView } from "@/features/timer/components/FocusView";
 import type { FocusTaskInfo } from "@/features/timer/types";
 
@@ -26,10 +27,11 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
   const { taskId, blockId } = await searchParams;
 
   // Parallel data fetching
-  const [allTasks, recentSessions, summary] = await Promise.all([
+  const [allTasks, recentSessions, summary, userSettings] = await Promise.all([
     getAllTasksByUserId(session.user.id),
     getRecentFocusSessions(session.user.id),
     getFocusSummary(session.user.id),
+    getUserSettings(session.user.id),
   ]);
 
   // Map tasks to FocusTaskInfo
@@ -111,6 +113,7 @@ export default async function FocusPage({ searchParams }: FocusPageProps) {
       initialTask={initialTask}
       plannedDurationMinutes={plannedDurationMinutes ?? undefined}
       blockId={blockId}
+      userFocusSettings={userSettings.focus}
     />
   );
 }

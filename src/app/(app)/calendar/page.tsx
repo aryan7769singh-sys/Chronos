@@ -14,6 +14,7 @@ import {
 import { getCalendarFeed } from "@/services/calendar.service";
 import { getTimeBlocks } from "@/services/planning.service";
 import { getAllProjects } from "@/services/project.service";
+import { getUserSettings } from "@/services/settings.service";
 import { prisma } from "@/lib/prisma";
 import { CalendarView } from "@/features/calendar/components/CalendarView";
 import type { CalendarViewMode } from "@/features/calendar/types";
@@ -38,13 +39,14 @@ export default async function CalendarPage({ searchParams }: CalendarPageProps) 
   }
 
   const { view, date } = await searchParams;
+  const userSettings = await getUserSettings(session.user.id);
 
-  // Validate view mode
+  // Validate view mode (fallback to user's saved default calendar view preference)
   const validModes: CalendarViewMode[] = ["month", "week", "day"];
   const viewMode: CalendarViewMode =
     view && validModes.includes(view as CalendarViewMode)
       ? (view as CalendarViewMode)
-      : "month";
+      : userSettings.planning.defaultCalendarView;
 
   // Validate date (default to today)
   let targetDate = new Date();

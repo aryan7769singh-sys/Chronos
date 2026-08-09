@@ -69,6 +69,7 @@ model User {
   focusSessions  FocusSession[]
   notes          Note[]
   timeBlocks     TimeBlock[]
+  settings       UserSettings?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -367,4 +368,63 @@ model TimeBlock {
   @@index([userId, endTime])
   @@index([projectId])
   @@index([taskId])
+}
+
+// ---------------------------------------------------------------------------
+// Settings & Personalization Domain Model
+// ---------------------------------------------------------------------------
+
+/// User-configurable settings and system preferences.
+/// Strictly owned by a User with a 1-to-1 relation.
+model UserSettings {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // APPEARANCE
+  theme         String  @default("system")
+  accentColor   String  @default("violet")
+  uiDensity     String  @default("comfortable")
+  reducedMotion Boolean @default(false)
+
+  // FOCUS
+  pomodoroMinutes          Int     @default(25)
+  shortBreakMinutes        Int     @default(5)
+  longBreakMinutes         Int     @default(15)
+  pomodoroCycles           Int     @default(4)
+  autoStartBreaks          Boolean @default(false)
+  autoStartWork            Boolean @default(false)
+  soundEnabled             Boolean @default(true)
+  soundVolume              Int     @default(80)
+  soundTheme               String  @default("chime")
+
+  // PLANNING
+  defaultCalendarView      String  @default("month")
+  weekStartsOn             Int     @default(0)
+  defaultTimeBlockMinutes  Int     @default(60)
+  workdayStart             String  @default("09:00")
+  workdayEnd               String  @default("17:00")
+
+  // NOTIFICATIONS
+  taskDeadlineReminders        Boolean @default(true)
+  timeBlockReminders           Boolean @default(true)
+  focusCompletionNotifications Boolean @default(true)
+  breakCompletionNotifications Boolean @default(true)
+  habitReminders               Boolean @default(true)
+  dailyPlanningReminder        Boolean @default(true)
+
+  // OVERLAY PREPARATION (Milestone 14 ready)
+  overlayEnabled         Boolean @default(true)
+  overlayOpacity         Int     @default(90)
+  overlayCompact         Boolean @default(false)
+  overlayShowCurrentTask Boolean @default(true)
+  overlayShowTimer       Boolean @default(true)
+  overlayShowNextBlock   Boolean @default(true)
+  overlayShowProgress    Boolean @default(true)
+
+  // KEYBOARD SHORTCUTS
+  customShortcuts Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

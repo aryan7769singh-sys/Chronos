@@ -13,6 +13,7 @@ import type {
   FocusSummary,
   FocusTaskInfo,
 } from "../types";
+import type { FocusSettings } from "@/features/settings/types";
 
 interface FocusViewProps {
   tasks: FocusTaskInfo[];
@@ -23,6 +24,8 @@ interface FocusViewProps {
   plannedDurationMinutes?: number;
   /** ID of the linked TimeBlock, if started from a time block */
   blockId?: string;
+  /** Persistent focus settings from user settings */
+  userFocusSettings?: FocusSettings;
 }
 
 export function FocusView({
@@ -31,6 +34,7 @@ export function FocusView({
   summary,
   initialTask,
   plannedDurationMinutes,
+  userFocusSettings,
 }: FocusViewProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -55,6 +59,23 @@ export function FocusView({
     setZenMode,
     setIsSubmitting,
   } = useTimerStore();
+
+  // Sync custom user settings to timer store on mount
+  const timerSettingsSynced = useRef(false);
+  useEffect(() => {
+    if (!timerSettingsSynced.current && userFocusSettings) {
+      useTimerStore.getState().updateSettings({
+        pomodoroWorkMinutes: userFocusSettings.pomodoroMinutes,
+        shortBreakMinutes: userFocusSettings.shortBreakMinutes,
+        longBreakMinutes: userFocusSettings.longBreakMinutes,
+        pomodorosUntilLongBreak: userFocusSettings.pomodoroCycles,
+        autoStartBreaks: userFocusSettings.autoStartBreaks,
+        autoStartPomodoros: userFocusSettings.autoStartWork,
+        soundEnabled: userFocusSettings.soundEnabled,
+      });
+      timerSettingsSynced.current = true;
+    }
+  }, [userFocusSettings]);
 
   // Set initial task if provided and none selected
   const initialTaskRef = useRef(false);
