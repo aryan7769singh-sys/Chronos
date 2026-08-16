@@ -8,6 +8,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/services/notification.service";
 import type {
   FocusSession,
   CreateFocusSessionInput,
@@ -169,8 +170,32 @@ export async function createFocusSession(
     return sessionRecord;
   });
 
+  // Trigger focus/break completion notification
+  try {
+    const isWork = input.mode !== "short_break" && input.mode !== "long_break";
+    const notifType = isWork ? "focus_completed" : "break_completed";
+    const notifTitle = isWork ? "Focus Session Completed!" : "Break Completed!";
+    const minsStr = Math.round(input.duration / 60);
+    const notifMsg = isWork
+      ? `Great deep work! You logged ${minsStr} minutes of focus.`
+      : "Break time is up. Ready to get back into focus?";
+
+    await createNotification(userId, {
+      type: notifType,
+      title: notifTitle,
+      message: notifMsg,
+      priority: "normal",
+      entityId: result.id,
+      entityType: "focus_session",
+      idempotencyKey: `${userId}_fs_${result.id}`,
+    });
+  } catch {
+    // ignore
+  }
+
   return mapFocusSession(result as unknown as PrismaFocusSession);
 }
+
 
 /**
  * Returns today's focus metrics for a user (total minutes, sessions count, daily goal).

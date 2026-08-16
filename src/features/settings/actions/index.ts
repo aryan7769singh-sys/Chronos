@@ -20,7 +20,9 @@ function revalidateSettingsRoutes() {
   revalidatePath("/calendar");
   revalidatePath("/tasks");
   revalidatePath("/analytics");
+  revalidatePath("/overlay");
 }
+
 
 // ---------------------------------------------------------------------------
 // Actions

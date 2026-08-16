@@ -4,13 +4,20 @@ const { screen } = require("electron");
 
 class WindowStateManager {
   constructor(userDataPath) {
-    this.configPath = path.join(userDataPath, "overlay-window-state.json");
-    this.defaultBounds = {
+    this.configPath = path.join(userDataPath, "chronos-desktop-state.json");
+    this.defaultHudBounds = {
       width: 420,
       height: 680,
       x: undefined,
       y: undefined,
     };
+    this.defaultWidgetBounds = {
+      width: 340,
+      height: 420,
+      x: undefined,
+      y: undefined,
+    };
+
   }
 
   loadState() {
@@ -18,44 +25,53 @@ class WindowStateManager {
       if (fs.existsSync(this.configPath)) {
         const raw = fs.readFileSync(this.configPath, "utf8");
         const state = JSON.parse(raw);
-        if (this.isValidState(state)) {
-          return state;
-        }
+        return {
+          mode: state.mode === "widget" ? "widget" : "hud",
+          alwaysOnTop: state.alwaysOnTop !== undefined ? state.alwaysOnTop : true,
+          hud: this.validateBounds(state.hud, this.defaultHudBounds),
+          widget: this.validateBounds(state.widget, this.defaultWidgetBounds),
+        };
       }
     } catch {
       // ignore
     }
-    return this.defaultBounds;
+    return {
+      mode: "hud",
+      alwaysOnTop: true,
+      hud: this.defaultHudBounds,
+      widget: this.defaultWidgetBounds,
+    };
   }
 
-  saveState(bounds) {
+  saveState(state) {
     try {
-      const data = JSON.stringify({
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height,
-      });
+      const data = JSON.stringify(state, null, 2);
       fs.writeFileSync(this.configPath, data, "utf8");
     } catch {
       // ignore
     }
   }
 
-  isValidState(state) {
-    if (!state || typeof state.x !== "number" || typeof state.y !== "number") {
-      return false;
+  validateBounds(bounds, defaultBounds) {
+    if (!bounds || typeof bounds.x !== "number" || typeof bounds.y !== "number") {
+      return defaultBounds;
     }
-    const displays = screen.getAllDisplays();
-    return displays.some((display) => {
-      const { x, y, width, height } = display.bounds;
-      return (
-        state.x >= x - 50 &&
-        state.x <= x + width - 50 &&
-        state.y >= y - 50 &&
-        state.y <= y + height - 50
-      );
-    });
+    try {
+      const displays = screen.getAllDisplays();
+      if (!displays || displays.length === 0) return bounds;
+      const isVisible = displays.some((display) => {
+        const { x, y, width, height } = display.bounds;
+        return (
+          bounds.x >= x - 50 &&
+          bounds.x <= x + width - 50 &&
+          bounds.y >= y - 50 &&
+          bounds.y <= y + height - 50
+        );
+      });
+      return isVisible ? bounds : defaultBounds;
+    } catch {
+      return bounds;
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 const { globalShortcut } = require("electron");
 
-function registerGlobalShortcuts(mainWindow) {
+function registerGlobalShortcuts(mainWindow, onToggleMode) {
   try {
     // Toggle HUD visibility (Ctrl+Shift+C)
     globalShortcut.register("CommandOrControl+Shift+C", () => {
@@ -9,6 +9,13 @@ function registerGlobalShortcuts(mainWindow) {
       } else {
         mainWindow.show();
         mainWindow.focus();
+      }
+    });
+
+    // Toggle Desktop Widget / HUD mode (Ctrl+Shift+W)
+    globalShortcut.register("CommandOrControl+Shift+W", () => {
+      if (typeof onToggleMode === "function") {
+        onToggleMode();
       }
     });
 

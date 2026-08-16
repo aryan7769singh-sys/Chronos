@@ -68,6 +68,9 @@ type PrismaUserSettingsRaw = {
   overlayShowTimer: boolean;
   overlayShowNextBlock: boolean;
   overlayShowProgress: boolean;
+  overlayShowUrgentTasks: boolean;
+  overlayUrgentTaskCount: number;
+  overlayShowNotifications: boolean;
   customShortcuts: Prisma.JsonValue;
   createdAt: Date;
   updatedAt: Date;
@@ -130,12 +133,16 @@ function mapPrismaSettingsToDTO(raw: PrismaUserSettingsRaw): UserSettings {
       overlayShowTimer: raw.overlayShowTimer ?? true,
       overlayShowNextBlock: raw.overlayShowNextBlock ?? true,
       overlayShowProgress: raw.overlayShowProgress ?? true,
+      overlayShowUrgentTasks: raw.overlayShowUrgentTasks ?? true,
+      overlayUrgentTaskCount: raw.overlayUrgentTaskCount ?? 3,
+      overlayShowNotifications: raw.overlayShowNotifications ?? true,
     },
     shortcuts,
     createdAt: raw.createdAt.toISOString(),
     updatedAt: raw.updatedAt.toISOString(),
   };
 }
+
 
 // Helper: clamp numbers to limits
 function clamp(val: number, min: number, max: number): number {
@@ -194,6 +201,9 @@ export async function getOrCreateUserSettings(userId: string): Promise<UserSetti
         overlayShowTimer: DEFAULT_USER_SETTINGS.overlay.overlayShowTimer,
         overlayShowNextBlock: DEFAULT_USER_SETTINGS.overlay.overlayShowNextBlock,
         overlayShowProgress: DEFAULT_USER_SETTINGS.overlay.overlayShowProgress,
+        overlayShowUrgentTasks: DEFAULT_USER_SETTINGS.overlay.overlayShowUrgentTasks,
+        overlayUrgentTaskCount: DEFAULT_USER_SETTINGS.overlay.overlayUrgentTaskCount,
+        overlayShowNotifications: DEFAULT_USER_SETTINGS.overlay.overlayShowNotifications,
       },
     });
   }
@@ -284,7 +294,13 @@ export async function updateUserSettings(
     if (input.overlay.overlayShowTimer !== undefined) data.overlayShowTimer = input.overlay.overlayShowTimer;
     if (input.overlay.overlayShowNextBlock !== undefined) data.overlayShowNextBlock = input.overlay.overlayShowNextBlock;
     if (input.overlay.overlayShowProgress !== undefined) data.overlayShowProgress = input.overlay.overlayShowProgress;
+    if (input.overlay.overlayShowUrgentTasks !== undefined) data.overlayShowUrgentTasks = input.overlay.overlayShowUrgentTasks;
+    if (input.overlay.overlayUrgentTaskCount !== undefined) {
+      data.overlayUrgentTaskCount = clamp(input.overlay.overlayUrgentTaskCount, 1, 3);
+    }
+    if (input.overlay.overlayShowNotifications !== undefined) data.overlayShowNotifications = input.overlay.overlayShowNotifications;
   }
+
 
   // Custom shortcuts map
   if (input.customShortcuts) {

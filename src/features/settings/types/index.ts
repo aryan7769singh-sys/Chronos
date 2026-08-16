@@ -56,7 +56,11 @@ export interface OverlaySettings {
   overlayShowTimer: boolean;
   overlayShowNextBlock: boolean;
   overlayShowProgress: boolean;
+  overlayShowUrgentTasks: boolean;
+  overlayUrgentTaskCount: number; // 1, 2, or 3
+  overlayShowNotifications: boolean;
 }
+
 
 export interface ShortcutItem {
   id: string;

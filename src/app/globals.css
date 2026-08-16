@@ -127,4 +127,14 @@
   html {
     @apply font-sans;
   }
+
+  /* Desktop Overlay & Wallpaper-Integrated Transparency */
+  html.bg-transparent,
+  body.bg-transparent,
+  body:has(#chronos-desktop-widget),
+  body:has(#chronos-command-hud),
+  body:has(.chronos-overlay-shell) {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
 }

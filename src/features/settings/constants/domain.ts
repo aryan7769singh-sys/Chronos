@@ -192,6 +192,10 @@ export const DEFAULT_USER_SETTINGS: Omit<UserSettings, "id" | "userId" | "create
     overlayShowTimer: true,
     overlayShowNextBlock: true,
     overlayShowProgress: true,
+    overlayShowUrgentTasks: true,
+    overlayUrgentTaskCount: 3,
+    overlayShowNotifications: true,
   },
   shortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
 };
+

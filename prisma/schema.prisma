@@ -70,6 +70,7 @@ model User {
   notes          Note[]
   timeBlocks     TimeBlock[]
   settings       UserSettings?
+  notifications  Notification[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
@@ -417,14 +418,46 @@ model UserSettings {
   overlayEnabled         Boolean @default(true)
   overlayOpacity         Int     @default(90)
   overlayCompact         Boolean @default(false)
-  overlayShowCurrentTask Boolean @default(true)
-  overlayShowTimer       Boolean @default(true)
-  overlayShowNextBlock   Boolean @default(true)
-  overlayShowProgress    Boolean @default(true)
+  overlayShowCurrentTask   Boolean @default(true)
+  overlayShowTimer         Boolean @default(true)
+  overlayShowNextBlock     Boolean @default(true)
+  overlayShowProgress      Boolean @default(true)
+  overlayShowUrgentTasks   Boolean @default(true)
+  overlayUrgentTaskCount   Int     @default(3)
+  overlayShowNotifications Boolean @default(true)
 
   // KEYBOARD SHORTCUTS
+
   customShortcuts Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ---------------------------------------------------------------------------
+// Notification Model (Milestone 16)
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           String
+  title          String
+  message        String
+  priority       String    @default("normal")
+  channel        String    @default("desktop")
+  entityId       String?
+  entityType     String?
+  idempotencyKey String?   @unique
+  scheduledFor   DateTime  @default(now())
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+  deletedAt      DateTime?
+
+  @@index([userId, scheduledFor])
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+

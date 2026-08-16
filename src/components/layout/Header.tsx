@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
-  Bell,
   Menu,
   Moon,
   Search,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 
@@ -147,16 +147,9 @@ export function Header({ onMenuClick, user }: HeaderProps) {
         {/* Theme toggle */}
         <ThemeToggle />
 
-        {/* Notifications (placeholder) */}
-        <Button
-          id="header-notifications"
-          variant="ghost"
-          size="icon"
-          aria-label="Notifications"
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Bell className="size-4" />
-        </Button>
+        {/* Proactive Notification Bell & Center */}
+        <NotificationBell />
+
 
         {/* Command HUD Launcher */}
         <Link

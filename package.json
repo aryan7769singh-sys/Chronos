@@ -10,10 +10,11 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio",
-    "electron:dev": "concurrently \"npm run dev\" \"electron .\"",
+    "electron:start": "electron .",
+    "electron:dev": "electron .",
     "electron:build": "electron-builder --win nsis"
   },
+
   "build": {
     "appId": "com.chronos.desktop",
     "productName": "Chronos Desktop HUD",

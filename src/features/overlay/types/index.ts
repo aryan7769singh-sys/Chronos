@@ -11,12 +11,13 @@ import type { UserSettings } from "@/features/settings/types";
 import type { ProjectColor, Priority } from "@/features/tasks/types";
 
 export type OverlayModuleKey =
-  | "focus"
+  | "timer"
   | "task"
+  | "urgent"
   | "timeblock"
-  | "nextblock"
   | "progress"
-  | "deadline"
+  | "notifications"
+  | "screentime"
   | "actions";
 
 export interface OverlayDeadlineInfo {
@@ -30,12 +31,27 @@ export interface OverlayDeadlineInfo {
   isOverdue: boolean;
 }
 
+export interface OverlayUrgentTask {
+  id: string;
+  projectId: string;
+  title: string;
+  priority: Priority;
+  deadline: string | null; // ISO string
+  projectName: string;
+  projectColor: ProjectColor;
+  isOverdue: boolean;
+  isToday: boolean;
+  isTomorrow: boolean;
+}
+
 export interface OverlayHUDData {
   userSettings: UserSettings;
   activeFocusTask: FocusTaskInfo | null;
   currentBlock: TimeBlockWithRelations | null;
   nextBlock: TimeBlockWithRelations | null;
+  urgentTasks: OverlayUrgentTask[];
   upcomingDeadline: OverlayDeadlineInfo | null;
   focusSummary: FocusSummary;
   completedTasksCountToday: number;
+  unreadNotificationsCount: number;
 }

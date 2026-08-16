@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { OverlayHUDData } from "../types";
 import { OverlayHUD } from "./OverlayHUD";
 import { useTimerStore } from "@/features/timer/store/useTimerStore";
@@ -11,9 +11,31 @@ interface OverlayShellProps {
   data: OverlayHUDData;
 }
 
+function subscribeDesktop() {
+  return () => {};
+}
+
+function getDesktopSnapshot() {
+  return (
+    typeof window !== "undefined" &&
+    !!(window as unknown as { chronosDesktop?: { isDesktop?: boolean } })
+      .chronosDesktop?.isDesktop
+  );
+}
+
+function getServerDesktopSnapshot() {
+  return false;
+}
+
 export function OverlayShell({ data }: OverlayShellProps) {
   const [bgMode, setBgMode] = useState<"dark" | "glass" | "transparent">("dark");
+  const isDesktop = useSyncExternalStore(
+    subscribeDesktop,
+    getDesktopSnapshot,
+    getServerDesktopSnapshot
+  );
   const { status, start, pause, reset, setZenMode, isZenMode } = useTimerStore();
+
 
   // Keyboard shortcut listener matching user settings
   useEffect(() => {
@@ -41,6 +63,35 @@ export function OverlayShell({ data }: OverlayShellProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [status, start, pause, reset, setZenMode, isZenMode]);
+
+  // Ensure document and body are transparent for the desktop overlay
+
+  useEffect(() => {
+    document.documentElement.classList.add("bg-transparent");
+    document.body.classList.add("bg-transparent");
+    document.documentElement.style.background = "transparent";
+    document.documentElement.style.backgroundColor = "transparent";
+    document.body.style.background = "transparent";
+    document.body.style.backgroundColor = "transparent";
+
+    return () => {
+      document.documentElement.classList.remove("bg-transparent");
+      document.body.classList.remove("bg-transparent");
+      document.documentElement.style.background = "";
+      document.documentElement.style.backgroundColor = "";
+      document.body.style.background = "";
+      document.body.style.backgroundColor = "";
+    };
+  }, []);
+
+  if (isDesktop) {
+    return (
+      <div className="w-full h-full p-1.5 bg-transparent overflow-hidden flex flex-col justify-start select-none chronos-overlay-shell">
+        <OverlayHUD data={data} />
+      </div>
+    );
+  }
+
 
   return (
     <div

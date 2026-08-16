@@ -2,8 +2,7 @@ const { Tray, Menu, nativeImage, app } = require("electron");
 
 let tray = null;
 
-function createSystemTray(mainWindow, targetUrl) {
-  // Create simple 16x16 icon data fallback
+function createSystemTray(mainWindow, targetUrl, currentState, onSwitchMode, onToggleAlwaysOnTop) {
   const icon = nativeImage.createEmpty();
 
   tray = new Tray(icon);
@@ -11,9 +10,12 @@ function createSystemTray(mainWindow, targetUrl) {
 
   const updateContextMenu = () => {
     const isVisible = mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible();
+    const currentMode = currentState.mode;
+    const isAlwaysOnTop = currentState.alwaysOnTop;
+
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: isVisible ? "Hide Command HUD" : "Show Command HUD",
+        label: isVisible ? "Hide Window" : "Show Window",
         click: () => {
           if (isVisible) {
             mainWindow.hide();
@@ -21,6 +23,30 @@ function createSystemTray(mainWindow, targetUrl) {
             mainWindow.show();
             mainWindow.focus();
           }
+          updateContextMenu();
+        },
+      },
+      {
+        label: currentMode === "hud" ? "✓ Floating HUD Mode" : "Switch to Floating HUD",
+        click: () => {
+          if (onSwitchMode) onSwitchMode("hud");
+          updateContextMenu();
+        },
+      },
+      {
+        label: currentMode === "widget" ? "✓ Desktop Widget Mode" : "Switch to Desktop Widget",
+        click: () => {
+          if (onSwitchMode) onSwitchMode("widget");
+          updateContextMenu();
+        },
+      },
+      {
+        label: isAlwaysOnTop ? "✓ Always on Top" : "Always on Top",
+        type: "checkbox",
+        checked: isAlwaysOnTop,
+        click: () => {
+          if (onToggleAlwaysOnTop) onToggleAlwaysOnTop(!isAlwaysOnTop);
+          updateContextMenu();
         },
       },
       { type: "separator" },
@@ -53,7 +79,7 @@ function createSystemTray(mainWindow, targetUrl) {
       },
       { type: "separator" },
       {
-        label: "Quit Chronos HUD",
+        label: "Quit Chronos",
         click: () => {
           app.isQuitting = true;
           app.quit();
@@ -75,7 +101,10 @@ function createSystemTray(mainWindow, targetUrl) {
     updateContextMenu();
   });
 
-  return tray;
+  return {
+    tray,
+    updateContextMenu,
+  };
 }
 
 module.exports = { createSystemTray };
