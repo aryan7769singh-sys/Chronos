@@ -4,10 +4,14 @@ import { useEffect } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTimerStore } from "@/features/timer/store/useTimerStore";
+import type { OverlayTimerSizeOption, OverlayTimerWeightOption } from "@/features/settings/types";
 import { cn } from "@/lib/utils";
 
 interface TimerModuleProps {
   compact?: boolean;
+  timerSize?: OverlayTimerSizeOption;
+  timerGlow?: boolean;
+  timerWeight?: OverlayTimerWeightOption;
 }
 
 function formatTimerTime(seconds: number): string {
@@ -16,7 +20,12 @@ function formatTimerTime(seconds: number): string {
   return `${String(mins).padStart(2, "0")}:${String(remSecs).padStart(2, "0")}`;
 }
 
-export function TimerModule({ compact = false }: TimerModuleProps) {
+export function TimerModule({
+  compact = false,
+  timerSize = "large",
+  timerGlow = true,
+  timerWeight = "bold",
+}: TimerModuleProps) {
   const { status, mode, timeLeft, start, pause, reset, tick } = useTimerStore();
 
   const isRunning = status === "running";
@@ -28,22 +37,39 @@ export function TimerModule({ compact = false }: TimerModuleProps) {
     return () => clearInterval(interval);
   }, [status, tick]);
 
-  const modeLabel = mode === "pomodoro"
-    ? "DEEP WORK"
-    : mode === "short_break"
-    ? "SHORT BREAK"
-    : mode === "long_break"
-    ? "LONG BREAK"
-    : mode === "stopwatch"
-    ? "STOPWATCH"
-    : "CUSTOM FOCUS";
+  const modeLabel =
+    mode === "pomodoro"
+      ? "DEEP WORK"
+      : mode === "short_break"
+      ? "SHORT BREAK"
+      : mode === "long_break"
+      ? "LONG BREAK"
+      : mode === "stopwatch"
+      ? "STOPWATCH"
+      : "CUSTOM FOCUS";
+
+  const sizeClass =
+    timerSize === "normal"
+      ? "text-4xl sm:text-5xl"
+      : timerSize === "xlarge"
+      ? "text-6xl sm:text-7xl"
+      : "text-5xl sm:text-6xl";
+
+  const weightClass =
+    timerWeight === "bold"
+      ? "font-bold"
+      : timerWeight === "extrabold"
+      ? "font-extrabold"
+      : "font-black";
+
+  const glowClass = timerGlow ? "drop-shadow-[0_2px_14px_rgba(255,255,255,0.25)]" : "";
 
   if (compact) {
     return (
       <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-white/10 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="size-2 rounded-full bg-violet-400 animate-pulse" />
-          <span className="text-xl font-extrabold font-mono tracking-tight text-white tabular-nums">
+          <span className={cn("font-mono tracking-tight text-white tabular-nums text-xl", weightClass)}>
             {formatTimerTime(timeLeft)}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-wider text-violet-300">
@@ -59,7 +85,7 @@ export function TimerModule({ compact = false }: TimerModuleProps) {
             size="sm"
             onClick={isRunning ? pause : start}
             className={cn(
-              "h-6 px-2 text-[10px] font-semibold gap-1 rounded-lg",
+              "h-6 px-2 text-[10px] font-semibold gap-1 rounded-lg cursor-pointer",
               isRunning
                 ? "bg-amber-500 hover:bg-amber-600 text-white"
                 : "bg-violet-600 hover:bg-violet-500 text-white"
@@ -73,7 +99,7 @@ export function TimerModule({ compact = false }: TimerModuleProps) {
             size="icon"
             variant="ghost"
             onClick={reset}
-            className="size-6 text-slate-400 hover:text-white hover:bg-white/10"
+            className="size-6 text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
             title="Reset Timer"
           >
             <RotateCcw className="size-3" />
@@ -87,7 +113,14 @@ export function TimerModule({ compact = false }: TimerModuleProps) {
     <div className="flex flex-col items-center justify-center text-center space-y-1.5 py-1 select-none">
       {/* Large Dominant Countdown Timer Typography */}
       <div className="relative flex flex-col items-center">
-        <div className="text-5xl sm:text-6xl font-black font-mono tracking-tight text-white tabular-nums drop-shadow-[0_2px_12px_rgba(255,255,255,0.15)] leading-none">
+        <div
+          className={cn(
+            "font-mono tracking-tight text-white tabular-nums leading-none transition-all duration-200",
+            sizeClass,
+            weightClass,
+            glowClass
+          )}
+        >
           {formatTimerTime(timeLeft)}
         </div>
 
@@ -100,7 +133,7 @@ export function TimerModule({ compact = false }: TimerModuleProps) {
         </div>
       </div>
 
-      {/* Subtle Control Buttons */}
+      {/* Control Buttons */}
       <div
         className="flex items-center justify-center gap-2 pt-2"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}

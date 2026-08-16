@@ -48,6 +48,13 @@ export interface NotificationSettings {
   dailyPlanningReminder: boolean;
 }
 
+export type OverlayPresetOption = "minimal" | "focus" | "productivity" | "custom";
+export type OverlayDensityOption = "minimal" | "compact" | "comfortable";
+export type OverlayBorderOption = "none" | "subtle" | "normal" | "accent";
+export type OverlayTimerSizeOption = "normal" | "large" | "xlarge";
+export type OverlayTimerWeightOption = "bold" | "extrabold" | "black";
+export type DesktopStartupModeOption = "widget" | "hud";
+
 export interface OverlaySettings {
   overlayEnabled: boolean;
   overlayOpacity: number; // 20 - 100
@@ -59,7 +66,20 @@ export interface OverlaySettings {
   overlayShowUrgentTasks: boolean;
   overlayUrgentTaskCount: number; // 1, 2, or 3
   overlayShowNotifications: boolean;
+
+  // Milestone 18 — Personalization & Desktop Startup
+  overlayPreset: OverlayPresetOption;
+  overlayDensity: OverlayDensityOption;
+  overlayBlur: number; // 0 - 40 px
+  overlayBorder: OverlayBorderOption;
+  overlayTimerSize: OverlayTimerSizeOption;
+  overlayTimerGlow: boolean;
+  overlayTimerWeight: OverlayTimerWeightOption;
+  launchOnStartup: boolean;
+  launchMinimized: boolean;
+  startupMode: DesktopStartupModeOption;
 }
+
 
 
 export interface ShortcutItem {

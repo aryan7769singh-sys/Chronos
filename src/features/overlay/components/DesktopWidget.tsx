@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface DesktopWidgetProps {
   data: OverlayHUDData;
+  settings: OverlaySettings;
   onSwitchToHud: () => void;
   opacity: number;
 }
@@ -35,9 +36,8 @@ function getServerDesktopSnapshot() {
   return false;
 }
 
-export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetProps) {
+export function DesktopWidget({ data, settings, onSwitchToHud, opacity }: DesktopWidgetProps) {
   const [timeStr, setTimeStr] = useState<string>("");
-  const [settings, setSettings] = useState<OverlaySettings>(data.userSettings.overlay);
   const widgetRef = useRef<HTMLDivElement>(null);
 
   const isDesktop = useSyncExternalStore(
@@ -63,22 +63,6 @@ export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetPro
     return () => clearInterval(interval);
   }, []);
 
-  // Real-time Settings Live-Sync Listener via BroadcastChannel
-  useEffect(() => {
-    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
-    try {
-      const channel = new BroadcastChannel("chronos-settings-broadcast");
-      channel.onmessage = (event) => {
-        if (event.data?.type === "SETTINGS_UPDATED" && event.data?.settings) {
-          setSettings(event.data.settings);
-        }
-      };
-      return () => channel.close();
-    } catch {
-      // ignore
-    }
-  }, []);
-
   // Auto-resize Electron window to fit widget content without large empty space
   useEffect(() => {
     if (!isDesktop || !widgetRef.current) return;
@@ -86,7 +70,7 @@ export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetPro
     const measureAndResize = () => {
       if (!widgetRef.current) return;
       const rect = widgetRef.current.getBoundingClientRect();
-      const contentHeight = Math.ceil(rect.height) + 16; // Add margin
+      const contentHeight = Math.ceil(rect.height) + 16;
       const contentWidth = Math.ceil(rect.width) + 16;
 
       const win = typeof window !== "undefined"
@@ -131,10 +115,25 @@ export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetPro
     settings.overlayShowProgress ||
     settings.overlayShowNotifications;
 
-  // Separate surface opacity from content visibility:
-  // The glass background scales its alpha, while timer & text content remain 100% visible!
+  // Glass Surface Opacity vs Content Visibility
   const surfaceAlpha = Math.max(0.12, Math.min(0.95, (opacity / 100) * 0.85));
-  const borderAlpha = Math.max(0.08, Math.min(0.4, (opacity / 100) * 0.3));
+  const blurPx = settings.overlayBlur ?? 20;
+
+  const borderStyleClass =
+    settings.overlayBorder === "none"
+      ? "border-none"
+      : settings.overlayBorder === "subtle"
+      ? "border border-white/5"
+      : settings.overlayBorder === "accent"
+      ? "border border-violet-500/40 shadow-violet-500/10"
+      : "border border-white/10";
+
+  const densityStyleClass =
+    settings.overlayDensity === "minimal"
+      ? "p-2 space-y-1.5"
+      : settings.overlayDensity === "compact"
+      ? "p-3 space-y-2"
+      : "p-3.5 space-y-2.5";
 
   return (
     <div className="w-full flex flex-col items-center justify-start p-1 bg-transparent select-none">
@@ -143,10 +142,13 @@ export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetPro
         id="chronos-desktop-widget"
         style={{
           backgroundColor: `rgba(2, 6, 23, ${surfaceAlpha})`,
-          borderColor: `rgba(255, 255, 255, ${borderAlpha})`,
+          backdropFilter: `blur(${blurPx}px)`,
+          WebkitBackdropFilter: `blur(${blurPx}px)`,
         }}
         className={cn(
-          "w-full rounded-2xl border backdrop-blur-2xl shadow-2xl p-3.5 space-y-2.5 text-card-foreground transition-all duration-300 ring-1 ring-white/5",
+          "w-full rounded-2xl shadow-2xl text-card-foreground transition-all duration-300 ring-1 ring-white/5",
+          borderStyleClass,
+          densityStyleClass,
           hasOptionalModules ? "max-w-[340px]" : "max-w-[280px]"
         )}
       >
@@ -209,9 +211,14 @@ export function DesktopWidget({ data, onSwitchToHud, opacity }: DesktopWidgetPro
           </div>
         </div>
 
-        {/* ── 1. TIMER MODULE (Dominant Visual Element — 100% Crisp at Low Opacity) ── */}
+        {/* ── 1. TIMER MODULE (Dominant Visual Element — Personalizable & Crisp) ── */}
         {settings.overlayShowTimer !== false && (
-          <TimerModule compact={settings.overlayCompact} />
+          <TimerModule
+            compact={settings.overlayCompact}
+            timerSize={settings.overlayTimerSize}
+            timerGlow={settings.overlayTimerGlow}
+            timerWeight={settings.overlayTimerWeight}
+          />
         )}
 
         {/* ── 2. ACTIVE FOCUS TASK MODULE ── */}

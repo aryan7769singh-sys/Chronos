@@ -426,7 +426,20 @@ model UserSettings {
   overlayUrgentTaskCount   Int     @default(3)
   overlayShowNotifications Boolean @default(true)
 
+  // MILESTONE 18 — PERSONALIZATION & DESKTOP STARTUP
+  overlayPreset          String  @default("custom")
+  overlayDensity         String  @default("comfortable")
+  overlayBlur            Int     @default(20)
+  overlayBorder          String  @default("normal")
+  overlayTimerSize       String  @default("large")
+  overlayTimerGlow       Boolean @default(true)
+  overlayTimerWeight     String  @default("bold")
+  launchOnStartup        Boolean @default(false)
+  launchMinimized        Boolean @default(false)
+  startupMode            String  @default("widget")
+
   // KEYBOARD SHORTCUTS
+
 
   customShortcuts Json?
 

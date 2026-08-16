@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import type { OverlayHUDData } from "../types";
 import type { OverlaySettings } from "@/features/settings/types";
 import { updateOverlayPreferencesAction } from "../actions";
+import { getUserSettingsAction } from "@/features/settings/actions";
 import { OverlayHeader } from "./OverlayHeader";
 import { TimerModule } from "./modules/TimerModule";
 import { CurrentTaskModule } from "./modules/CurrentTaskModule";
@@ -63,7 +64,7 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
     }
   }, []);
 
-  // Real-time Settings Live-Sync Listener via BroadcastChannel
+  // 1. Real-time Settings Live-Sync Listener via BroadcastChannel (Same-Context)
   useEffect(() => {
     if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
     try {
@@ -71,7 +72,7 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
       channel.onmessage = (event) => {
         if (event.data?.type === "SETTINGS_UPDATED" && event.data?.settings) {
           setSettings(event.data.settings);
-          if (event.data.settings.overlayOpacity !== undefined) {
+          if (typeof event.data.settings.overlayOpacity === "number") {
             setOpacity(event.data.settings.overlayOpacity);
           }
         }
@@ -80,6 +81,36 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
     } catch {
       // ignore
     }
+  }, []);
+
+  // 2. Poll DB settings every 3 seconds to catch cross-process mutations (e.g. browser tab -> PostgreSQL -> Electron)
+  useEffect(() => {
+    let mounted = true;
+
+    const syncFromDb = async () => {
+      try {
+        const userSettings = await getUserSettingsAction();
+        if (mounted && userSettings?.overlay) {
+          setSettings((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(userSettings.overlay)) {
+              if (typeof userSettings.overlay.overlayOpacity === "number") {
+                setOpacity(userSettings.overlay.overlayOpacity);
+              }
+              return userSettings.overlay;
+            }
+            return prev;
+          });
+        }
+      } catch {
+        // ignore unauthenticated or network errors gracefully
+      }
+    };
+
+    const interval = setInterval(syncFromDb, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleSwitchMode = (mode: "hud" | "widget") => {
@@ -92,7 +123,20 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
 
   const handleToggleCompact = async () => {
     const nextCompact = !settings.overlayCompact;
-    setSettings((prev) => ({ ...prev, overlayCompact: nextCompact }));
+    const updatedSettings = { ...settings, overlayCompact: nextCompact };
+    setSettings(updatedSettings);
+
+    // Broadcast change to other tabs/windows
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const channel = new BroadcastChannel("chronos-settings-broadcast");
+        channel.postMessage({ type: "SETTINGS_UPDATED", settings: updatedSettings });
+        channel.close();
+      } catch {
+        // ignore
+      }
+    }
+
     try {
       await updateOverlayPreferencesAction({ overlayCompact: nextCompact });
     } catch {
@@ -102,7 +146,20 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
 
   const handleOpacityChange = async (newOpacity: number) => {
     setOpacity(newOpacity);
-    setSettings((prev) => ({ ...prev, overlayOpacity: newOpacity }));
+    const updatedSettings = { ...settings, overlayOpacity: newOpacity };
+    setSettings(updatedSettings);
+
+    // Broadcast change to other tabs/windows
+    if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+      try {
+        const channel = new BroadcastChannel("chronos-settings-broadcast");
+        channel.postMessage({ type: "SETTINGS_UPDATED", settings: updatedSettings });
+        channel.close();
+      } catch {
+        // ignore
+      }
+    }
+
     try {
       await updateOverlayPreferencesAction({ overlayOpacity: newOpacity });
     } catch {
@@ -114,6 +171,7 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
     return (
       <DesktopWidget
         data={hudData}
+        settings={settings}
         onSwitchToHud={() => handleSwitchMode("hud")}
         opacity={opacity}
       />
@@ -136,7 +194,6 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
         settings.overlayCompact && "max-w-xs p-3 space-y-2.5"
       )}
     >
-
       {/* Header with status, opacity, drag handle & window controls */}
       <OverlayHeader
         compact={settings.overlayCompact}
@@ -148,7 +205,12 @@ export function OverlayHUD({ data }: OverlayHUDProps) {
 
       {/* 1. Focus Timer Module */}
       {settings.overlayShowTimer !== false && (
-        <TimerModule compact={settings.overlayCompact} />
+        <TimerModule
+          compact={settings.overlayCompact}
+          timerSize={settings.overlayTimerSize}
+          timerGlow={settings.overlayTimerGlow}
+          timerWeight={settings.overlayTimerWeight}
+        />
       )}
 
       {!settings.overlayCompact && (

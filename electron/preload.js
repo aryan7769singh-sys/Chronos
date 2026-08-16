@@ -42,6 +42,10 @@ contextBridge.exposeInMainWorld("chronosDesktop", {
   openExternal: (routeOrUrl) => {
     ipcRenderer.send("chronos:open-external", routeOrUrl);
   },
+  setStartupSettings: (input) => {
+    ipcRenderer.send("chronos:set-startup-settings", input);
+  },
 });
+
 
 

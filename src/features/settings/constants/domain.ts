@@ -195,7 +195,18 @@ export const DEFAULT_USER_SETTINGS: Omit<UserSettings, "id" | "userId" | "create
     overlayShowUrgentTasks: true,
     overlayUrgentTaskCount: 3,
     overlayShowNotifications: true,
+    overlayPreset: "custom",
+    overlayDensity: "comfortable",
+    overlayBlur: 20,
+    overlayBorder: "normal",
+    overlayTimerSize: "large",
+    overlayTimerGlow: true,
+    overlayTimerWeight: "bold",
+    launchOnStartup: false,
+    launchMinimized: false,
+    startupMode: "widget",
   },
   shortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
 };
+
 

@@ -71,6 +71,16 @@ type PrismaUserSettingsRaw = {
   overlayShowUrgentTasks: boolean;
   overlayUrgentTaskCount: number;
   overlayShowNotifications: boolean;
+  overlayPreset: string;
+  overlayDensity: string;
+  overlayBlur: number;
+  overlayBorder: string;
+  overlayTimerSize: string;
+  overlayTimerGlow: boolean;
+  overlayTimerWeight: string;
+  launchOnStartup: boolean;
+  launchMinimized: boolean;
+  startupMode: string;
   customShortcuts: Prisma.JsonValue;
   createdAt: Date;
   updatedAt: Date;
@@ -136,12 +146,23 @@ function mapPrismaSettingsToDTO(raw: PrismaUserSettingsRaw): UserSettings {
       overlayShowUrgentTasks: raw.overlayShowUrgentTasks ?? true,
       overlayUrgentTaskCount: raw.overlayUrgentTaskCount ?? 3,
       overlayShowNotifications: raw.overlayShowNotifications ?? true,
+      overlayPreset: (raw.overlayPreset as UserSettings["overlay"]["overlayPreset"]) || "custom",
+      overlayDensity: (raw.overlayDensity as UserSettings["overlay"]["overlayDensity"]) || "comfortable",
+      overlayBlur: raw.overlayBlur ?? 20,
+      overlayBorder: (raw.overlayBorder as UserSettings["overlay"]["overlayBorder"]) || "normal",
+      overlayTimerSize: (raw.overlayTimerSize as UserSettings["overlay"]["overlayTimerSize"]) || "large",
+      overlayTimerGlow: raw.overlayTimerGlow ?? true,
+      overlayTimerWeight: (raw.overlayTimerWeight as UserSettings["overlay"]["overlayTimerWeight"]) || "bold",
+      launchOnStartup: raw.launchOnStartup ?? false,
+      launchMinimized: raw.launchMinimized ?? false,
+      startupMode: (raw.startupMode as UserSettings["overlay"]["startupMode"]) || "widget",
     },
     shortcuts,
     createdAt: raw.createdAt.toISOString(),
     updatedAt: raw.updatedAt.toISOString(),
   };
 }
+
 
 
 // Helper: clamp numbers to limits
@@ -204,6 +225,16 @@ export async function getOrCreateUserSettings(userId: string): Promise<UserSetti
         overlayShowUrgentTasks: DEFAULT_USER_SETTINGS.overlay.overlayShowUrgentTasks,
         overlayUrgentTaskCount: DEFAULT_USER_SETTINGS.overlay.overlayUrgentTaskCount,
         overlayShowNotifications: DEFAULT_USER_SETTINGS.overlay.overlayShowNotifications,
+        overlayPreset: DEFAULT_USER_SETTINGS.overlay.overlayPreset,
+        overlayDensity: DEFAULT_USER_SETTINGS.overlay.overlayDensity,
+        overlayBlur: DEFAULT_USER_SETTINGS.overlay.overlayBlur,
+        overlayBorder: DEFAULT_USER_SETTINGS.overlay.overlayBorder,
+        overlayTimerSize: DEFAULT_USER_SETTINGS.overlay.overlayTimerSize,
+        overlayTimerGlow: DEFAULT_USER_SETTINGS.overlay.overlayTimerGlow,
+        overlayTimerWeight: DEFAULT_USER_SETTINGS.overlay.overlayTimerWeight,
+        launchOnStartup: DEFAULT_USER_SETTINGS.overlay.launchOnStartup,
+        launchMinimized: DEFAULT_USER_SETTINGS.overlay.launchMinimized,
+        startupMode: DEFAULT_USER_SETTINGS.overlay.startupMode,
       },
     });
   }
@@ -299,7 +330,19 @@ export async function updateUserSettings(
       data.overlayUrgentTaskCount = clamp(input.overlay.overlayUrgentTaskCount, 1, 3);
     }
     if (input.overlay.overlayShowNotifications !== undefined) data.overlayShowNotifications = input.overlay.overlayShowNotifications;
+
+    if (input.overlay.overlayPreset !== undefined) data.overlayPreset = input.overlay.overlayPreset;
+    if (input.overlay.overlayDensity !== undefined) data.overlayDensity = input.overlay.overlayDensity;
+    if (input.overlay.overlayBlur !== undefined) data.overlayBlur = clamp(input.overlay.overlayBlur, 0, 40);
+    if (input.overlay.overlayBorder !== undefined) data.overlayBorder = input.overlay.overlayBorder;
+    if (input.overlay.overlayTimerSize !== undefined) data.overlayTimerSize = input.overlay.overlayTimerSize;
+    if (input.overlay.overlayTimerGlow !== undefined) data.overlayTimerGlow = input.overlay.overlayTimerGlow;
+    if (input.overlay.overlayTimerWeight !== undefined) data.overlayTimerWeight = input.overlay.overlayTimerWeight;
+    if (input.overlay.launchOnStartup !== undefined) data.launchOnStartup = input.overlay.launchOnStartup;
+    if (input.overlay.launchMinimized !== undefined) data.launchMinimized = input.overlay.launchMinimized;
+    if (input.overlay.startupMode !== undefined) data.startupMode = input.overlay.startupMode;
   }
+
 
 
   // Custom shortcuts map

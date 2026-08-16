@@ -1,6 +1,8 @@
 {
   "name": "chronos",
   "version": "0.1.0",
+  "description": "Chronos Desktop Companion & Overlay HUD",
+  "author": "Chronos Team",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -15,6 +17,7 @@
     "electron:build": "electron-builder --win nsis"
   },
 
+
   "build": {
     "appId": "com.chronos.desktop",
     "productName": "Chronos Desktop HUD",
@@ -22,13 +25,35 @@
       "output": "dist-electron"
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Chronos Desktop HUD"
     },
     "files": [
+      "package.json",
       "electron/**/*",
       "desktop-config.json"
-    ]
+    ],
+    "asar": true
   },
+
+
+
+
+
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
