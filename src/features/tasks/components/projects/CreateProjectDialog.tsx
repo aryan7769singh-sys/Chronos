@@ -256,7 +256,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
             type="submit"
             form="create-project-form"
             disabled={!name.trim() || isPending}
-            className="bg-violet-600 hover:bg-violet-700 text-white"
+            className="shadow-xs font-medium"
           >
             {isPending ? "Creating…" : "Create Project"}
           </Button>

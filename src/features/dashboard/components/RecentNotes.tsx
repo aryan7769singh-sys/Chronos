@@ -20,7 +20,7 @@ export function RecentNotes({ notes }: RecentNotesProps) {
     <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <FileText className="size-4 text-violet-500" />
+          <FileText className="size-4 text-primary" />
           <span>Knowledge & Notes</span>
         </CardTitle>
         <Link
@@ -61,8 +61,8 @@ export function RecentNotes({ notes }: RecentNotesProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        {n.pinned && <Pin className="size-2.5 text-violet-500 fill-violet-500 shrink-0" />}
-                        <p className="text-xs font-semibold text-foreground line-clamp-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        {n.pinned && <Pin className="size-2.5 text-primary fill-primary shrink-0" />}
+                        <p className="text-xs font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                           {n.title}
                         </p>
                       </div>

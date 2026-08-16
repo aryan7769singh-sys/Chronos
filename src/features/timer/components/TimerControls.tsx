@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SegmentedTabs } from "@/components/ui/segmented-tabs";
 import type { TimerMode, TimerStatus } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -55,28 +56,18 @@ export function TimerControls({
   return (
     <div className="flex flex-col items-center gap-5 w-full max-w-md mx-auto">
       {/* Mode Selector Tabs */}
-      <div className="flex items-center justify-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/60 w-full overflow-x-auto">
-        {MODES.map((m) => {
-          const Icon = m.icon;
-          const isActive = mode === m.id;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => onSetMode(m.id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer shrink-0",
-                isActive
-                  ? "bg-background text-foreground shadow-xs font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-              )}
-            >
-              <Icon className="size-3.5" />
-              <span>{m.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedTabs
+        size="sm"
+        value={mode}
+        onValueChange={(m) => onSetMode(m as TimerMode)}
+        options={MODES.map((m) => ({
+          id: m.id,
+          label: m.label,
+          icon: m.icon,
+        }))}
+        aria-label="Timer mode"
+        className="w-full justify-center max-w-md overflow-x-auto"
+      />
 
       {/* Quick Test Presets (Only visible when Custom Mode is active) */}
       {mode === "custom" && (
@@ -139,8 +130,8 @@ export function TimerControls({
           className={cn(
             "h-14 px-8 rounded-full text-base font-semibold transition-all duration-200 shadow-md cursor-pointer gap-2",
             isRunning
-              ? "bg-amber-600 hover:bg-amber-700 text-white"
-              : "bg-violet-600 hover:bg-violet-700 text-white"
+              ? "bg-amber-600 hover:bg-amber-700 text-white dark:bg-amber-600 dark:hover:bg-amber-500"
+              : "bg-primary hover:bg-primary/90 text-primary-foreground"
           )}
           aria-label={isRunning ? "Pause session" : "Start session"}
           title="Space to toggle"

@@ -38,37 +38,49 @@ interface SidebarNavItemProps {
   item: NavItem;
   isCollapsed: boolean;
   isActive: boolean;
+  onItemClick?: () => void;
 }
 
-function SidebarNavItem({ item, isCollapsed, isActive }: SidebarNavItemProps) {
+function SidebarNavItem({
+  item,
+  isCollapsed,
+  isActive,
+  onItemClick,
+}: SidebarNavItemProps) {
   const isInteractive = !item.disabled && !item.soon;
 
   const linkContent = (
     <Link
       href={isInteractive ? item.href : "#"}
+      onClick={isInteractive ? onItemClick : undefined}
       aria-current={isActive ? "page" : undefined}
       aria-disabled={!isInteractive}
       tabIndex={isInteractive ? undefined : -1}
       className={cn(
-        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150",
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs sm:text-sm font-medium transition-colors duration-150 min-h-[38px]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-        (!isInteractive) && "pointer-events-none opacity-40",
+          ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+        !isInteractive && "pointer-events-none opacity-40",
         isCollapsed && "justify-center px-2"
       )}
     >
       {/* Active indicator bar */}
       {isActive && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-primary" />
+        <span
+          className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-md bg-primary"
+          aria-hidden="true"
+        />
       )}
 
       <item.icon
         className={cn(
           "shrink-0 transition-transform duration-150",
           isCollapsed ? "size-5" : "size-4",
-          isActive ? "text-primary" : "text-current"
+          isActive
+            ? "text-primary"
+            : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"
         )}
         strokeWidth={isActive ? 2 : 1.75}
       />
@@ -100,7 +112,7 @@ function SidebarNavItem({ item, isCollapsed, isActive }: SidebarNavItemProps) {
             className="ml-auto flex items-center gap-1"
           >
             {item.badge !== undefined && (
-              <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full bg-primary px-1.5 text-[0.65rem] font-semibold text-primary-foreground leading-none">
+              <span className="inline-flex items-center justify-center min-w-[1.25rem] h-4.5 rounded-full bg-primary px-1.5 text-[0.65rem] font-semibold text-primary-foreground leading-none">
                 {item.badge}
               </span>
             )}
@@ -118,10 +130,10 @@ function SidebarNavItem({ item, isCollapsed, isActive }: SidebarNavItemProps) {
   // When collapsed, wrap with a tooltip showing the label
   if (isCollapsed) {
     return (
-      <TooltipProvider delay={300}>
+      <TooltipProvider delay={200}>
         <Tooltip>
           <TooltipTrigger>{linkContent}</TooltipTrigger>
-          <TooltipContent side="right">
+          <TooltipContent side="right" sideOffset={8}>
             <span>{item.label}</span>
             {item.soon && (
               <span className="ml-1.5 opacity-60 text-[0.65rem] uppercase tracking-wide">
@@ -144,11 +156,16 @@ function SidebarNavItem({ item, isCollapsed, isActive }: SidebarNavItemProps) {
 interface SidebarContentProps {
   isCollapsed: boolean;
   pathname: string;
+  onItemClick?: () => void;
 }
 
-function SidebarContent({ isCollapsed, pathname }: SidebarContentProps) {
+function SidebarContent({
+  isCollapsed,
+  pathname,
+  onItemClick,
+}: SidebarContentProps) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col select-none">
       {/* Logo / Branding */}
       <div
         className={cn(
@@ -156,39 +173,50 @@ function SidebarContent({ isCollapsed, pathname }: SidebarContentProps) {
           isCollapsed ? "justify-center" : "gap-2.5"
         )}
       >
-        <div className="flex items-center justify-center size-7 rounded-lg bg-primary shrink-0">
-          <Timer className="size-4 text-primary-foreground" strokeWidth={2} />
-        </div>
+        <Link
+          href="/dashboard"
+          onClick={onItemClick}
+          className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg p-1"
+          aria-label="Chronos Dashboard"
+        >
+          <div className="flex items-center justify-center size-7 rounded-lg bg-primary text-primary-foreground shadow-xs shrink-0">
+            <Timer className="size-4" strokeWidth={2.2} />
+          </div>
 
-        <AnimatePresence initial={false}>
-          {!isCollapsed && (
-            <motion.span
-              key="brand-name"
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={{ duration: 0.15, ease: "easeInOut" }}
-              className="overflow-hidden whitespace-nowrap font-semibold text-sm tracking-tight text-foreground"
-            >
-              Chronos
-            </motion.span>
-          )}
-        </AnimatePresence>
+          <AnimatePresence initial={false}>
+            {!isCollapsed && (
+              <motion.span
+                key="brand-name"
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.15, ease: "easeInOut" }}
+                className="overflow-hidden whitespace-nowrap font-bold text-sm tracking-tight text-sidebar-foreground"
+              >
+                Chronos
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation items */}
       <nav
-        aria-label="Main navigation"
-        className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5"
+        aria-label="Main workspace navigation"
+        className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-0.5 scrollbar-none"
       >
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
           return (
             <SidebarNavItem
               key={item.href}
               item={item}
               isCollapsed={isCollapsed}
               isActive={isActive}
+              onItemClick={onItemClick}
             />
           );
         })}
@@ -223,11 +251,14 @@ export function Sidebar({
         <div className="shrink-0 border-t border-sidebar-border p-2 flex justify-center">
           <button
             id="sidebar-collapse-toggle"
+            type="button"
             onClick={() => onCollapsedChange(!isCollapsed)}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/50 transition-colors duration-150",
-              "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+              "flex size-8 items-center justify-center rounded-lg text-sidebar-foreground/60 transition-colors duration-150",
+              "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             )}
           >
             {isCollapsed ? (
@@ -241,11 +272,15 @@ export function Sidebar({
 
       {/* ── Mobile Sheet ──────────────────────────────────────────────── */}
       <Sheet open={isMobileOpen} onOpenChange={onMobileOpenChange}>
-        <SheetContent side="left" className="w-60 p-0" showCloseButton={false}>
+        <SheetContent side="left" className="w-64 p-0 bg-sidebar border-r border-sidebar-border" showCloseButton={false}>
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
-          <SidebarContent isCollapsed={false} pathname={pathname} />
+          <SidebarContent
+            isCollapsed={false}
+            pathname={pathname}
+            onItemClick={() => onMobileOpenChange(false)}
+          />
         </SheetContent>
       </Sheet>
     </>

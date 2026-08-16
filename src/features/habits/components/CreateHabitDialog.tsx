@@ -85,7 +85,7 @@ export function CreateHabitDialog() {
         id="btn-new-habit"
         size="sm"
         onClick={() => setOpen(true)}
-        className="gap-1.5 font-medium shadow-sm bg-violet-600 hover:bg-violet-700 text-white dark:bg-violet-600 dark:hover:bg-violet-500"
+        className="gap-1.5 font-medium shadow-xs"
       >
         <Plus className="size-4" />
         <span>New Habit</span>
@@ -306,7 +306,7 @@ export function CreateHabitDialog() {
               type="submit"
               size="sm"
               disabled={isPending}
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="shadow-xs font-medium"
             >
               {isPending ? "Creating…" : "Create Habit"}
             </Button>

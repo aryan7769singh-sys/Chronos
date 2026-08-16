@@ -25,25 +25,25 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
     total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle>Habits</CardTitle>
-            <span className="inline-flex items-center justify-center rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-semibold text-muted-foreground">
+            <CardTitle className="text-sm font-semibold">Habits</CardTitle>
+            <span className="inline-flex items-center justify-center rounded-full bg-muted/80 px-2 py-0.5 text-[0.65rem] font-semibold text-muted-foreground border border-border/60">
               {completedCount}/{total} today
             </span>
           </div>
           <Link
             href="/habits"
-            className="text-[11px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 hover:underline"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             View all
           </Link>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="p-4 pt-2 space-y-4">
         {habits.length > 0 ? (
           /* Habit grid — 2 per row */
           <div className="grid grid-cols-2 gap-2">
@@ -53,10 +53,10 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
                 <div
                   key={habit.id}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors",
+                    "flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors border",
                     habit.completedToday
-                      ? "bg-primary/8 ring-1 ring-primary/20"
-                      : "bg-muted/50"
+                      ? "bg-primary/10 border-primary/25"
+                      : "bg-muted/40 border-border/40"
                   )}
                 >
                   {/* Completion indicator */}
@@ -65,7 +65,7 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
                       "flex size-7 shrink-0 items-center justify-center rounded-full",
                       habit.completedToday
                         ? "bg-primary text-primary-foreground"
-                        : "bg-background ring-1 ring-border text-muted-foreground"
+                        : "bg-background border border-border text-muted-foreground"
                     )}
                     aria-label={
                       habit.completedToday ? "Completed" : "Not completed"
@@ -86,7 +86,7 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
                     >
                       {habit.label}
                     </p>
-                    <p className="mt-0.5 text-[0.6rem] text-muted-foreground">
+                    <p className="mt-1 text-[10px] text-muted-foreground font-medium">
                       🔥 {habit.streak}d streak
                     </p>
                   </div>
@@ -95,13 +95,13 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
             })}
           </div>
         ) : (
-          <div className="py-4 text-center">
+          <div className="py-6 text-center space-y-1.5">
             <p className="text-xs text-muted-foreground">
               No active habits tracked yet.
             </p>
             <Link
               href="/habits"
-              className="mt-1.5 inline-block text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+              className="inline-block text-xs font-medium text-primary hover:underline"
             >
               Start tracking habits →
             </Link>
@@ -109,10 +109,12 @@ export function HabitSummary({ habits = [] }: HabitSummaryProps) {
         )}
 
         {/* Overall progress */}
-        <Progress value={progressPercent}>
-          <ProgressLabel>Daily progress</ProgressLabel>
-          <ProgressValue>{progressPercent}%</ProgressValue>
-        </Progress>
+        <div className="space-y-1.5 pt-1">
+          <Progress value={progressPercent} className="h-1.5">
+            <ProgressLabel className="sr-only">Daily habit progress</ProgressLabel>
+            <ProgressValue className="sr-only">{progressPercent}%</ProgressValue>
+          </Progress>
+        </div>
       </CardContent>
     </Card>
   );

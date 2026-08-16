@@ -50,34 +50,34 @@ export function TodaysTasks({ tasks = [] }: TodaysTasksProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle>Today&apos;s Tasks</CardTitle>
-            <span className="inline-flex items-center justify-center size-5 rounded-full bg-muted text-[0.65rem] font-semibold text-muted-foreground tabular-nums">
+            <CardTitle className="text-sm font-semibold">Today&apos;s Tasks</CardTitle>
+            <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full bg-muted/80 px-1.5 text-[0.65rem] font-semibold text-muted-foreground border border-border/60 tabular-nums">
               {completedCount}/{displayTasks.length}
             </span>
           </div>
           <Link
             href="/tasks"
-            className="text-[11px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 hover:underline"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             View all
           </Link>
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-4 pt-2">
         {displayTasks.length > 0 ? (
-          <ul className="space-y-1" role="list">
+          <ul className="space-y-1.5" role="list">
             {displayTasks.map((task) => {
               const isDone = task.status === "done";
 
               return (
                 <li
                   key={task.id}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
+                  className="flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-muted/40 border border-transparent hover:border-border/40"
                 >
                   {/* Interactive status checkbox */}
                   <button
@@ -86,23 +86,21 @@ export function TodaysTasks({ tasks = [] }: TodaysTasksProps) {
                     disabled={isPending}
                     aria-label={isDone ? "Mark incomplete" : "Mark complete"}
                     className={cn(
-                      "flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-all cursor-pointer",
+                      "flex size-4 shrink-0 items-center justify-center rounded-md border transition-all cursor-pointer",
                       isDone
                         ? "border-emerald-600 bg-emerald-600 text-white dark:bg-emerald-500"
-                        : "border-border bg-background hover:border-primary",
+                        : "border-border/80 bg-background hover:border-primary",
                       isPending && "opacity-60"
                     )}
                   >
-                    {isDone && (
-                      <Check className="size-2.5 stroke-[3]" />
-                    )}
+                    {isDone && <Check className="size-2.5 stroke-[3]" />}
                   </button>
 
                   {/* Title & Link */}
                   <Link
                     href={`/projects/${task.projectId}/${task.id}`}
                     className={cn(
-                      "flex-1 text-sm leading-snug truncate transition-colors hover:text-primary",
+                      "flex-1 text-xs leading-snug truncate transition-colors hover:text-primary",
                       isDone && "text-muted-foreground line-through"
                     )}
                   >
@@ -116,8 +114,9 @@ export function TodaysTasks({ tasks = [] }: TodaysTasksProps) {
                         "size-1.5 rounded-full shrink-0",
                         PRIORITY_DOT[task.priority]
                       )}
+                      aria-hidden="true"
                     />
-                    <span className="text-[0.65rem] text-muted-foreground font-medium">
+                    <span className="text-[10px] text-muted-foreground font-medium">
                       {PRIORITY_LABEL[task.priority]}
                     </span>
                   </div>
@@ -126,8 +125,8 @@ export function TodaysTasks({ tasks = [] }: TodaysTasksProps) {
             })}
           </ul>
         ) : (
-          <div className="py-4 text-center">
-            <CheckSquare className="size-6 mx-auto text-muted-foreground mb-1.5 opacity-50" />
+          <div className="py-6 text-center space-y-1.5">
+            <CheckSquare className="size-6 mx-auto text-muted-foreground/60" />
             <p className="text-xs text-muted-foreground">
               No tasks scheduled for today.
             </p>
@@ -135,13 +134,16 @@ export function TodaysTasks({ tasks = [] }: TodaysTasksProps) {
         )}
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="p-4 pt-1">
         <Link
           href="/tasks"
-          className={buttonVariants({ variant: "outline", size: "sm", className: "w-full gap-1.5" })}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "w-full gap-1.5 text-xs shadow-xs"
+          )}
         >
           <Plus className="size-3.5" />
-          New Task
+          <span>New Task</span>
         </Link>
       </CardFooter>
     </Card>

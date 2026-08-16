@@ -21,10 +21,10 @@ export function TodaysPlanWidget({ blocks }: TodaysPlanWidgetProps) {
     <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <CalendarClock className="size-4 text-violet-500" />
+          <CalendarClock className="size-4 text-primary" />
           <span>Today&apos;s Plan</span>
           {remainingCount > 0 && (
-            <span className="inline-flex items-center justify-center size-5 rounded-full bg-violet-500/10 text-[0.65rem] font-semibold text-violet-600 dark:text-violet-400 tabular-nums">
+            <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 rounded-full bg-primary/10 text-[0.65rem] font-semibold text-primary tabular-nums border border-primary/20">
               {remainingCount}
             </span>
           )}

@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { FocusSummary } from "@/features/timer/types";
 
 function formatFocusTime(minutes: number): string {
@@ -29,48 +30,48 @@ export function FocusCard({ summary }: FocusCardProps) {
 
   return (
     <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
-      <CardHeader className="pb-3">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle>Focus Session</CardTitle>
-          <div className="flex items-center justify-center size-8 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+          <CardTitle className="text-sm font-semibold">Focus Session</CardTitle>
+          <div className="flex items-center justify-center size-7 rounded-lg bg-primary/10 text-primary">
             <Timer className="size-4" strokeWidth={1.75} />
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="p-4 pt-2 space-y-3">
         <p className="text-xs text-muted-foreground leading-relaxed">
           Launch a structured focus block to enter deep work and track your productivity.
         </p>
 
         <div className="flex items-center justify-between gap-2 text-xs bg-muted/40 p-2.5 rounded-lg border border-border/40">
           <div className="space-y-0.5">
-            <span className="text-muted-foreground">Today&apos;s Focus</span>
+            <span className="text-muted-foreground text-[11px]">Today&apos;s Focus</span>
             <p className="font-mono font-bold text-foreground text-sm">
               {focusTimeDisplay}
             </p>
           </div>
 
           <div className="text-right space-y-0.5">
-            <span className="text-muted-foreground">Sessions</span>
+            <span className="text-muted-foreground text-[11px]">Sessions</span>
             <p className="font-mono font-bold text-foreground text-sm flex items-center justify-end gap-1">
-              <Flame className="size-3.5 text-violet-500" />
+              <Flame className="size-3.5 text-amber-500" />
               <span>{completedSessions}</span>
             </p>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="pt-1">
+      <CardFooter className="p-4 pt-1">
         <Link
           href="/focus"
-          className={buttonVariants({
-            size: "sm",
-            className: "w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white cursor-pointer",
-          })}
+          className={cn(
+            buttonVariants({ size: "sm" }),
+            "w-full gap-2 text-xs font-semibold shadow-xs"
+          )}
         >
           <Timer className="size-3.5" />
-          Start Focus
+          <span>Start Focus</span>
         </Link>
       </CardFooter>
     </Card>

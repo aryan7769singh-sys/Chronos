@@ -297,7 +297,7 @@ export function EditHabitDialog({
               type="submit"
               size="sm"
               disabled={isPending}
-              className="bg-violet-600 hover:bg-violet-700 text-white"
+              className="shadow-xs font-medium"
             >
               {isPending ? "Saving…" : "Save Changes"}
             </Button>

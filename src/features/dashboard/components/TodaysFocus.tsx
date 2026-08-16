@@ -38,24 +38,24 @@ interface TodaysFocusProps {
 export function TodaysFocus({ task }: TodaysFocusProps) {
   if (!task) {
     return (
-      <Card className="border-border/60 bg-card/60 backdrop-blur-xs">
-        <CardHeader className="pb-3">
-          <CardTitle>Today&apos;s Focus</CardTitle>
+      <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm font-semibold">Today&apos;s Focus</CardTitle>
         </CardHeader>
-        <CardContent className="py-6 text-center space-y-2">
+        <CardContent className="p-6 text-center space-y-2">
           <Sparkles className="size-6 mx-auto text-muted-foreground/60" />
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             No active tasks to focus on
           </p>
           <p className="text-xs text-muted-foreground max-w-xs mx-auto">
             Create or select a task in your projects to launch a focused deep work session.
           </p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="p-4 pt-1">
           <Link href="/focus" className="w-full">
             <Button variant="outline" className="w-full gap-2 text-xs" size="sm">
               <Play className="size-3.5" />
-              Open Focus Timer
+              <span>Open Focus Timer</span>
             </Button>
           </Link>
         </CardFooter>
@@ -73,10 +73,10 @@ export function TodaysFocus({ task }: TodaysFocusProps) {
       : 0;
 
   return (
-    <Card className="border-border/60 bg-card/60 backdrop-blur-xs">
-      <CardHeader className="pb-3">
+    <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle>Today&apos;s Focus</CardTitle>
+          <CardTitle className="text-sm font-semibold">Today&apos;s Focus</CardTitle>
           <div className="flex items-center gap-1.5">
             <span
               className={cn(
@@ -100,15 +100,15 @@ export function TodaysFocus({ task }: TodaysFocusProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="p-4 pt-2 space-y-3">
         {/* Task title */}
-        <p className="text-base font-semibold leading-snug text-foreground truncate">
+        <p className="text-sm font-semibold leading-snug text-foreground truncate">
           {task.title}
         </p>
 
         {/* Next step */}
         {task.currentStep ? (
-          <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 p-2 rounded-md border border-border/40">
+          <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/40">
             <span className="font-semibold text-foreground shrink-0">
               Next step:
             </span>
@@ -143,14 +143,14 @@ export function TodaysFocus({ task }: TodaysFocusProps) {
         )}
       </CardContent>
 
-      <CardFooter className="pt-1">
+      <CardFooter className="p-4 pt-1">
         <Link href={`/focus?taskId=${task.id}`} className="w-full">
           <Button
-            className="w-full gap-2 bg-violet-600 hover:bg-violet-700 text-white cursor-pointer"
+            className="w-full gap-2 text-xs font-semibold shadow-xs cursor-pointer"
             size="sm"
           >
             <Play className="size-3.5 fill-current" />
-            Start Focus Session
+            <span>Start Focus Session</span>
           </Button>
         </Link>
       </CardFooter>

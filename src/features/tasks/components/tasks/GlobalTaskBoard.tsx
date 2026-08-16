@@ -37,14 +37,14 @@ export function GlobalTaskBoard({ tasks }: GlobalTaskBoardProps) {
   }, [tasks]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3.5 items-start overflow-x-auto pb-4">
+    <div className="flex flex-nowrap lg:grid lg:grid-cols-5 gap-3.5 items-start overflow-x-auto pb-4 scrollbar-none">
       {BOARD_COLUMNS.map((col) => {
         const colTasks = groupedTasks.get(col.id) || [];
 
         return (
           <div
             key={col.id}
-            className="flex flex-col gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-3 min-h-[400px]"
+            className="flex flex-col gap-2.5 rounded-xl border border-border/60 bg-muted/20 p-3 min-h-[400px] w-[280px] shrink-0 lg:w-auto lg:shrink"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between pb-1.5 border-b border-border/40">

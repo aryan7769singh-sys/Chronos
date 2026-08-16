@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Clock, Tag, FileText, ArrowRight, Play } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { cn } from "@/lib/utils";
 import {
   TASK_STATUS_LABEL,
@@ -46,26 +47,14 @@ export function TaskDetails({ task, project, subtasks, taskNotes = [], allProjec
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm">
-        <Link
-          href="/projects"
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Projects
-        </Link>
-        <ArrowRight className="size-3.5 text-muted-foreground/50 shrink-0" />
-        <Link
-          href={`/projects/${project.id}`}
-          className="text-muted-foreground hover:text-foreground transition-colors truncate max-w-[140px]"
-        >
-          {project.name}
-        </Link>
-        <ArrowRight className="size-3.5 text-muted-foreground/50 shrink-0" />
-        <span className="text-foreground font-medium truncate max-w-[180px]">
-          {task.title}
-        </span>
-      </nav>
+      {/* Breadcrumb Navigation */}
+      <Breadcrumbs
+        items={[
+          { label: "Projects", href: "/projects" },
+          { label: project.name, href: `/projects/${project.id}` },
+          { label: task.title },
+        ]}
+      />
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 items-start">

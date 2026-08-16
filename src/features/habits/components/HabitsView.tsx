@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Repeat2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { HabitHeader } from "./HabitHeader";
 import { HabitStatsBar } from "./HabitStatsBar";
 import { HabitWeeklyMatrix } from "./HabitWeeklyMatrix";
@@ -64,26 +65,20 @@ export function HabitsView({ habits, stats }: HabitsViewProps) {
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-border/70 p-12 text-center bg-card/30 flex flex-col items-center justify-center gap-3">
-            <div className="size-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
-              <Repeat2 className="size-6" />
-            </div>
-            <div className="max-w-xs space-y-1">
-              <p className="text-sm font-semibold text-foreground">
-                {selectedCategory === "All"
-                  ? "No habits tracked yet"
-                  : `No ${selectedCategory} habits found`}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {selectedCategory === "All"
-                  ? "Create your first daily habit to start tracking streaks and building momentum."
-                  : "Add a habit to this category or switch filters to view your routine."}
-              </p>
-            </div>
-            <div className="pt-2">
-              <CreateHabitDialog />
-            </div>
-          </div>
+          <EmptyState
+            icon={Repeat2}
+            title={
+              selectedCategory === "All"
+                ? "No habits tracked yet"
+                : `No ${selectedCategory} habits found`
+            }
+            description={
+              selectedCategory === "All"
+                ? "Create your first daily habit to start tracking streaks and building momentum."
+                : "Add a habit to this category or switch filters to view your routine."
+            }
+            action={<CreateHabitDialog />}
+          />
         )}
       </div>
     </div>

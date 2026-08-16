@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { Plus, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TaskStatsHeader } from "./TaskStatsHeader";
 import { TaskFilterBar } from "./TaskFilterBar";
 import { GlobalTaskCard } from "./GlobalTaskCard";
@@ -137,37 +139,22 @@ export function TasksView({ tasks, projects, stats }: TasksViewProps) {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-[1400px] mx-auto">
       {/* 1. Header with Title, Count badge, and + New Task trigger */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Tasks
-            </h1>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 border border-blue-500/20">
-              <CheckSquare className="size-3.5" />
-              <span>
-                {filteredTasks.length} {filteredTasks.length === 1 ? "Task" : "Tasks"}
-              </span>
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Unified command hub for all project tasks, deadlines, and execution progress.
-          </p>
-        </div>
-
-        {/* Action Button */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+      <PageHeader
+        title="Tasks"
+        description="Unified command hub for all project tasks, deadlines, and execution progress."
+        badge={`${filteredTasks.length} ${filteredTasks.length === 1 ? "Task" : "Tasks"}`}
+        action={
           <Button
             id="btn-global-new-task"
             size="sm"
             onClick={() => setIsCreateOpen(true)}
-            className="gap-1.5 font-medium shadow-sm bg-violet-600 hover:bg-violet-700 text-white dark:bg-violet-600 dark:hover:bg-violet-500"
+            className="gap-1.5 font-medium shadow-xs"
           >
             <Plus className="size-4" />
             <span>New Task</span>
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* 2. Top Metrics / Stats Overview */}
       <TaskStatsHeader stats={stats} />
@@ -242,31 +229,25 @@ export function TasksView({ tasks, projects, stats }: TasksViewProps) {
           </>
         ) : (
           /* Empty state */
-          <div className="rounded-2xl border border-dashed border-border/70 p-12 text-center bg-card/30 flex flex-col items-center justify-center gap-3">
-            <div className="size-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
-              <CheckSquare className="size-6" />
-            </div>
-            <div className="max-w-xs space-y-1">
-              <p className="text-sm font-semibold text-foreground">
-                No matching tasks found
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {tasks.length === 0
-                  ? "Create your first task to start organizing work across your projects."
-                  : "No tasks match your current filter criteria. Try clearing or modifying filters."}
-              </p>
-            </div>
-            <div className="pt-2">
+          <EmptyState
+            icon={CheckSquare}
+            title="No matching tasks found"
+            description={
+              tasks.length === 0
+                ? "Create your first task to start organizing work across your projects."
+                : "No tasks match your current filter criteria. Try clearing or modifying filters."
+            }
+            action={
               <Button
                 size="sm"
                 onClick={() => setIsCreateOpen(true)}
-                className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
+                className="gap-1.5 shadow-xs"
               >
                 <Plus className="size-4" />
                 <span>Create Task</span>
               </Button>
-            </div>
-          </div>
+            }
+          />
         )}
       </div>
 

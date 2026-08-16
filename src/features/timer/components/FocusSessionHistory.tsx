@@ -2,7 +2,8 @@
 
 import { Clock, Flame, CheckCircle2, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
+import { StatCard } from "@/components/ui/stat-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { PROJECT_COLOR_STYLES, ProjectIcon } from "@/features/tasks/constants/domain";
 import { TIMER_MODE_COLORS, TIMER_MODE_LABELS } from "../constants/timer";
@@ -26,45 +27,14 @@ export function FocusSessionHistory({
   return (
     <div className="space-y-4 w-full">
       {/* Overview Stat Card */}
-      <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="size-8 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
-                <Flame className="size-4" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-medium">
-                  Today&apos;s Focus
-                </p>
-                <p className="text-lg font-bold text-foreground font-mono tabular-nums leading-none mt-0.5">
-                  {summary.todayFocusMinutes}m
-                  <span className="text-xs font-normal text-muted-foreground ml-1">
-                    / {summary.dailyGoalMinutes}m goal
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <span className="text-xs text-muted-foreground font-medium">
-                Sessions
-              </span>
-              <p className="text-lg font-bold text-foreground font-mono tabular-nums leading-none mt-0.5">
-                {summary.todayCompletedSessions}
-              </p>
-            </div>
-          </div>
-
-          {/* Daily Goal Progress */}
-          <div className="space-y-1">
-            <Progress value={goalProgress} className="h-1.5">
-              <ProgressLabel className="sr-only">Daily focus goal</ProgressLabel>
-              <ProgressValue className="sr-only">{goalProgress}%</ProgressValue>
-            </Progress>
-          </div>
-        </CardContent>
-      </Card>
+      <StatCard
+        title="Today's Focus"
+        value={`${summary.todayFocusMinutes}m`}
+        icon={Flame}
+        tone="primary"
+        subtitle={`Goal: ${summary.dailyGoalMinutes}m • ${summary.todayCompletedSessions} sessions`}
+        progress={goalProgress}
+      />
 
       {/* Recent Sessions List */}
       <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
@@ -147,13 +117,12 @@ export function FocusSessionHistory({
               })}
             </div>
           ) : (
-            <div className="py-8 text-center text-muted-foreground space-y-1">
-              <Clock className="size-5 mx-auto text-muted-foreground/60" />
-              <p className="text-xs font-medium">No sessions recorded yet</p>
-              <p className="text-[11px]">
-                Hit &ldquo;Start Focus&rdquo; above to log your first session.
-              </p>
-            </div>
+            <EmptyState
+              icon={Clock}
+              title="No sessions recorded yet"
+              description="Hit 'Start Focus' above to log your first session."
+              className="py-6"
+            />
           )}
         </CardContent>
       </Card>

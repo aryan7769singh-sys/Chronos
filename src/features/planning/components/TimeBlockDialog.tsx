@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/ui/form-select";
 import {
   createTimeBlockAction,
   updateTimeBlockAction,
@@ -223,46 +224,30 @@ export function TimeBlockDialog({
 
             {/* Project & Task */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="tb-project" className="text-xs font-medium text-foreground">
-                  Project
-                </label>
-                <select
-                  id="tb-project"
-                  value={projectId}
-                  onChange={(e) => {
-                    setProjectId(e.target.value);
-                    setTaskId("");
-                  }}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="">No Project</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect
+                id="tb-project"
+                label="Project"
+                value={projectId}
+                onChange={(e) => {
+                  setProjectId(e.target.value);
+                  setTaskId("");
+                }}
+                options={[
+                  { value: "", label: "No Project" },
+                  ...projects.map((p) => ({ value: p.id, label: p.name })),
+                ]}
+              />
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="tb-task" className="text-xs font-medium text-foreground">
-                  Task
-                </label>
-                <select
-                  id="tb-task"
-                  value={taskId}
-                  onChange={(e) => handleTaskChange(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="">No Task</option>
-                  {availableTasks.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormSelect
+                id="tb-task"
+                label="Task"
+                value={taskId}
+                onChange={(e) => handleTaskChange(e.target.value)}
+                options={[
+                  { value: "", label: "No Task" },
+                  ...availableTasks.map((t) => ({ value: t.id, label: t.title })),
+                ]}
+              />
             </div>
 
             {/* Color */}

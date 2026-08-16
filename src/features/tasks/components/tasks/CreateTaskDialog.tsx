@@ -5,6 +5,8 @@ import { FolderKanban, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormSelect } from "@/components/ui/form-select";
 import {
   Dialog,
   DialogContent,
@@ -133,30 +135,26 @@ export function CreateTaskDialog({
           </DialogHeader>
 
           {hasNoProjects ? (
-            <div className="rounded-xl border border-dashed border-border/80 p-6 text-center space-y-3 bg-muted/20 my-2">
-              <FolderKanban className="size-8 mx-auto text-muted-foreground" />
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  No Projects Found
-                </p>
-                <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                  Tasks in Chronos must belong to a project. Create your first project to start organizing tasks.
-                </p>
-              </div>
-              <div className="pt-1">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    handleClose();
-                    setIsCreateProjectOpen(true);
-                  }}
-                  className="gap-1.5 bg-violet-600 hover:bg-violet-700 text-white"
-                >
-                  <Plus className="size-3.5" />
-                  <span>Create Project</span>
-                </Button>
-              </div>
+            <div className="py-2">
+              <EmptyState
+                icon={FolderKanban}
+                title="No Projects Found"
+                description="Tasks in Chronos must belong to a project. Create your first project to start organizing tasks."
+                action={
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      handleClose();
+                      setIsCreateProjectOpen(true);
+                    }}
+                    className="gap-1.5"
+                  >
+                    <Plus className="size-3.5" />
+                    <span>Create Project</span>
+                  </Button>
+                }
+              />
             </div>
           ) : (
             <form id="create-task-form" onSubmit={handleSubmit} className="space-y-4 pt-1">
@@ -168,24 +166,14 @@ export function CreateTaskDialog({
 
               {/* Project selector if not locked to an initialProjectId */}
               {!initialProjectId && projects.length > 0 && (
-                <div className="space-y-1.5">
-                  <label htmlFor="task-project-select" className="text-xs font-medium">
-                    Project <span className="text-destructive">*</span>
-                  </label>
-                  <select
-                    id="task-project-select"
-                    value={selectedProjectId}
-                    onChange={(e) => setSelectedProjectId(e.target.value)}
-                    className="w-full h-9 rounded-md border border-border/60 bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                    required
-                  >
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <FormSelect
+                  id="task-project-select"
+                  label="Project"
+                  required
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                />
               )}
 
               {/* Title */}
@@ -352,7 +340,7 @@ export function CreateTaskDialog({
                   type="submit"
                   form="create-task-form"
                   disabled={!title.trim() || isPending}
-                  className="bg-violet-600 hover:bg-violet-700 text-white"
+                  className="shadow-xs font-medium"
                 >
                   {isPending ? "Creating…" : "Create Task"}
                 </Button>

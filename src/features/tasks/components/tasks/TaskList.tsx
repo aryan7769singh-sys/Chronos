@@ -1,4 +1,5 @@
 import { ChevronDown, InboxIcon } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import {
   TASK_STATUS_LABEL,
@@ -24,17 +25,12 @@ const DEFAULT_OPEN_STATUSES = new Set<TaskStatus>([
 export function TaskList({ tasks, projectId }: TaskListProps) {
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-muted">
-          <InboxIcon className="size-5 text-muted-foreground" strokeWidth={1.5} />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-foreground">No tasks yet</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Add a task to get started on this project.
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon={InboxIcon}
+        title="No tasks yet"
+        description="Add a task to get started on this project."
+        className="py-12"
+      />
     );
   }
 

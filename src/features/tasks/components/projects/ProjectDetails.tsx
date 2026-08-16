@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
-  ArrowLeft,
   CalendarDays,
   CheckCircle2,
   Clock,
@@ -11,7 +9,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { cn } from "@/lib/utils";
 import {
   PROJECT_COLOR_CLASSES,
@@ -54,17 +52,13 @@ export function ProjectDetails({ project, tasks, projectNotes = [] }: ProjectDet
   return (
     <>
       <div className="space-y-6">
-        {/* Breadcrumb */}
-        <Link
-          href="/projects"
-          className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "gap-1.5 -ml-2 text-muted-foreground hover:text-foreground w-fit"
-          )}
-        >
-          <ArrowLeft className="size-3.5" />
-          Projects
-        </Link>
+        {/* Breadcrumb Navigation */}
+        <Breadcrumbs
+          items={[
+            { label: "Projects", href: "/projects" },
+            { label: project.name },
+          ]}
+        />
 
         {/* Project header */}
         <div

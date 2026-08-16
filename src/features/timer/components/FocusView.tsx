@@ -6,6 +6,7 @@ import { TimerControls } from "./TimerControls";
 import { FocusTaskSelector } from "./FocusTaskSelector";
 import { FocusSessionHistory } from "./FocusSessionHistory";
 import { ZenOverlay } from "./ZenOverlay";
+import { PageHeader } from "@/components/ui/page-header";
 import { useTimerStore } from "../store/useTimerStore";
 import { recordFocusSessionAction } from "../actions";
 import type {
@@ -157,24 +158,15 @@ export function FocusView({
     <>
       <div className="p-4 md:p-6 max-w-[1400px] mx-auto space-y-6">
         {/* Page Header */}
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              Focus &amp; Deep Work
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Execute deep work sessions and track your focus time.
-            </p>
-          </div>
-
-          {/* Time Block context badge — informational only */}
-          {plannedDurationMinutes && plannedDurationMinutes > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-xs text-violet-600 dark:text-violet-400 font-medium">
-              <span className="size-1.5 rounded-full bg-violet-500 inline-block" />
-              Planned block: {plannedDurationMinutes}m
-            </div>
-          )}
-        </div>
+        <PageHeader
+          title="Focus & Deep Work"
+          description="Execute deep work sessions and track your focus time."
+          badge={
+            plannedDurationMinutes && plannedDurationMinutes > 0
+              ? `Planned: ${plannedDurationMinutes}m`
+              : undefined
+          }
+        />
 
         {/* 2-Column Responsive Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">

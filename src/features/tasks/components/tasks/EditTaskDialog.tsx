@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/ui/form-select";
 import {
   Dialog,
   DialogContent,
@@ -145,41 +146,21 @@ export function EditTaskDialog({
 
           {/* Status & Priority row */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label htmlFor="edit-task-status" className="text-xs font-medium">
-                Status
-              </label>
-              <select
-                id="edit-task-status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="w-full h-9 rounded-md border border-border/60 bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              id="edit-task-status"
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as TaskStatus)}
+              options={STATUS_OPTIONS.map((s) => ({ value: s.id, label: s.label }))}
+            />
 
-            <div className="space-y-1.5">
-              <label htmlFor="edit-task-priority" className="text-xs font-medium">
-                Priority
-              </label>
-              <select
-                id="edit-task-priority"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as Priority)}
-                className="w-full h-9 rounded-md border border-border/60 bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                {PRIORITY_OPTIONS.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              id="edit-task-priority"
+              label="Priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+              options={PRIORITY_OPTIONS.map((p) => ({ value: p.id, label: p.label }))}
+            />
           </div>
 
           {/* Deadline & Estimated Duration */}
@@ -250,6 +231,7 @@ export function EditTaskDialog({
             </label>
             <Input
               id="edit-task-tags"
+              placeholder="e.g. backend, ui, urgent"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
               className="h-9 text-xs"
@@ -286,7 +268,7 @@ export function EditTaskDialog({
             type="submit"
             form="edit-task-form"
             disabled={!title.trim() || isPending}
-            className="bg-violet-600 hover:bg-violet-700 text-white"
+            className="shadow-xs font-medium"
           >
             {isPending ? "Saving…" : "Save Changes"}
           </Button>

@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/ui/form-select";
 import { createEventAction, updateEventAction } from "../../actions";
 import type { CalendarEvent, CalendarEventType } from "../../types";
 import type { Project, Task, ProjectColor } from "@/features/tasks/types";
@@ -251,46 +252,30 @@ export function EventFormDialog({
 
           {/* Project & Task Linking */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="event-project" className="text-xs font-medium text-foreground">
-                Link to Project (Optional)
-              </label>
-              <select
-                id="event-project"
-                value={projectId}
-                onChange={(e) => {
-                  setProjectId(e.target.value);
-                  setTaskId(""); // Reset task when project changes
-                }}
-                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="">No Project</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              id="event-project"
+              label="Link to Project (Optional)"
+              value={projectId}
+              onChange={(e) => {
+                setProjectId(e.target.value);
+                setTaskId(""); // Reset task when project changes
+              }}
+              options={[
+                { value: "", label: "No Project" },
+                ...projects.map((p) => ({ value: p.id, label: p.name })),
+              ]}
+            />
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="event-task" className="text-xs font-medium text-foreground">
-                Link to Task (Optional)
-              </label>
-              <select
-                id="event-task"
-                value={taskId}
-                onChange={(e) => setTaskId(e.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 py-1 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="">No Task</option>
-                {availableTasks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormSelect
+              id="event-task"
+              label="Link to Task (Optional)"
+              value={taskId}
+              onChange={(e) => setTaskId(e.target.value)}
+              options={[
+                { value: "", label: "No Task" },
+                ...availableTasks.map((t) => ({ value: t.id, label: t.title })),
+              ]}
+            />
           </div>
 
           {/* Location */}

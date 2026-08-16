@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SegmentedTabs } from "@/components/ui/segmented-tabs";
+import { EmptyState } from "@/components/ui/empty-state";
 import { NotesHeader } from "./NotesHeader";
 import { NoteCard } from "./NoteCard";
 import { NoteEditor } from "./NoteEditor";
@@ -122,8 +124,7 @@ export function NotesView({
           const matchContent = n.content.toLowerCase().includes(q);
           const matchCategory = n.category.toLowerCase().includes(q);
           const matchProject = n.project?.name.toLowerCase().includes(q);
-          const matchTask = n.task?.title.toLowerCase().includes(q);
-          if (!matchTitle && !matchContent && !matchCategory && !matchProject && !matchTask) {
+          if (!matchTitle && !matchContent && !matchCategory && !matchProject) {
             return false;
           }
         }
@@ -168,7 +169,7 @@ export function NotesView({
             <Button
               variant={showPinnedOnly ? "default" : "outline"}
               size="sm"
-              className={cn("h-9 gap-1.5 text-xs shrink-0", showPinnedOnly && "bg-violet-600 hover:bg-violet-700")}
+              className="h-9 gap-1.5 text-xs shrink-0"
               onClick={() => setShowPinnedOnly(!showPinnedOnly)}
             >
               <Pin className="size-3.5" />
@@ -192,6 +193,7 @@ export function NotesView({
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
                 className="h-9 text-xs rounded-md border border-border/60 bg-card/60 px-2.5 focus:outline-none focus:ring-1 focus:ring-ring"
+                aria-label="Filter by project"
               >
                 <option value="all">All Projects</option>
                 {projects.map((p) => (
@@ -207,6 +209,7 @@ export function NotesView({
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as "updatedAt" | "createdAt" | "title")}
               className="h-9 text-xs rounded-md border border-border/60 bg-card/60 px-2.5 focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label="Sort notes"
             >
               <option value="updatedAt">Recently Updated</option>
               <option value="createdAt">Date Created</option>
@@ -214,32 +217,23 @@ export function NotesView({
             </select>
 
             {/* Grid / List View Switcher */}
-            <div className="flex items-center rounded-lg border border-border/60 p-0.5 bg-card/60 shrink-0">
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className={cn("size-7 rounded-md", viewMode === "grid" && "bg-muted text-foreground")}
-                onClick={() => setViewMode("grid")}
-                title="Grid View"
-              >
-                <LayoutGrid className="size-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className={cn("size-7 rounded-md", viewMode === "list" && "bg-muted text-foreground")}
-                onClick={() => setViewMode("list")}
-                title="List View"
-              >
-                <ListIcon className="size-3.5" />
-              </Button>
-            </div>
+            <SegmentedTabs
+              size="sm"
+              value={viewMode}
+              onValueChange={(val) => setViewMode(val as "grid" | "list")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "list", label: "List", icon: ListIcon },
+              ]}
+              aria-label="Notes view mode"
+            />
           </div>
         </div>
 
         {/* Category Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           <button
+            type="button"
             onClick={() => setSelectedCategory("all")}
             className={cn(
               "px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0",
@@ -257,6 +251,7 @@ export function NotesView({
             return (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setSelectedCategory(cat)}
                 className={cn(
                   "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors shrink-0 border border-transparent",
@@ -276,52 +271,46 @@ export function NotesView({
       {/* Notes Content Display */}
       {!hasAnyNotes ? (
         /* Empty State: Zero Notes Exist */
-        <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed border-border/80 rounded-xl bg-card/30 space-y-4">
-          <div className="size-12 rounded-xl bg-violet-500/10 text-violet-500 flex items-center justify-center">
-            <Sparkles className="size-6" />
-          </div>
-          <div className="space-y-1.5 max-w-sm">
-            <h3 className="text-base font-bold text-foreground">Your workspace is quiet</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Capture an idea, meeting note, study thought, or project reference to build your Chronos knowledge hub.
-            </p>
-          </div>
-          <Button onClick={() => handleOpenEditor()} className="gap-1.5 shadow-xs">
-            <Plus className="size-4" />
-            <span>Create your first note</span>
-          </Button>
-        </div>
+        <EmptyState
+          icon={Sparkles}
+          title="Your workspace is quiet"
+          description="Capture an idea, meeting note, study thought, or project reference to build your Chronos knowledge hub."
+          action={
+            <Button onClick={() => handleOpenEditor()} className="gap-1.5 shadow-xs">
+              <Plus className="size-4" />
+              <span>Create your first note</span>
+            </Button>
+          }
+        />
       ) : filteredNotes.length === 0 ? (
         /* Empty State: Filters Match 0 Notes */
-        <div className="flex flex-col items-center justify-center p-12 text-center border border-border/60 rounded-xl bg-card/30 space-y-3">
-          <FileText className="size-8 text-muted-foreground/60" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-foreground">No notes match your filters</h3>
-            <p className="text-xs text-muted-foreground">
-              Try adjusting your search query, category selection, or project filters.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCategory("all");
-              setShowPinnedOnly(false);
-              setSelectedProjectId("all");
-            }}
-          >
-            Clear Filters
-          </Button>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="No notes match your filters"
+          description="Try adjusting your search query, category selection, or project filters."
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("all");
+                setShowPinnedOnly(false);
+                setSelectedProjectId("all");
+              }}
+            >
+              Clear Filters
+            </Button>
+          }
+        />
       ) : (
         /* Grid / List display */
         <div className="space-y-6">
           {/* Pinned Notes Section */}
           {!showPinnedOnly && pinnedNotes.length > 0 && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
-                <Pin className="size-3.5 fill-violet-500" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <Pin className="size-3.5 fill-primary" />
                 <span>Pinned Notes ({pinnedNotes.length})</span>
               </div>
               <div

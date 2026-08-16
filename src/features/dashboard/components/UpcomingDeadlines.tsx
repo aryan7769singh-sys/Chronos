@@ -30,22 +30,22 @@ interface UpcomingDeadlinesProps {
 
 export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle>Upcoming Deadlines</CardTitle>
+          <CardTitle className="text-sm font-semibold">Upcoming Deadlines</CardTitle>
           <Link
             href="/calendar"
-            className="text-[11px] font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 hover:underline"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Calendar
           </Link>
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-4 pt-2">
         {deadlines.length > 0 ? (
-          <ul className="space-y-2" role="list">
+          <ul className="space-y-1.5" role="list">
             {deadlines.map((deadline) => {
               const urgency = getUrgencyLevel(deadline.deadline);
               const relativeTime = formatDistanceToNow(new Date(deadline.deadline), {
@@ -58,7 +58,7 @@ export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
               return (
                 <li
                   key={deadline.id}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
+                  className="flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-muted/40 border border-transparent hover:border-border/40"
                 >
                   {/* Urgency dot */}
                   <span
@@ -66,13 +66,13 @@ export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
                       "size-1.5 shrink-0 rounded-full",
                       URGENCY_DOT[urgency]
                     )}
-                    aria-hidden
+                    aria-hidden="true"
                   />
 
                   {/* Title Link */}
                   <Link
                     href={`/projects/${deadline.projectId}/${deadline.id}`}
-                    className="flex-1 text-sm leading-snug text-foreground hover:text-primary transition-colors truncate"
+                    className="flex-1 text-xs leading-snug text-foreground hover:text-primary transition-colors truncate"
                   >
                     {deadline.title}
                   </Link>
@@ -91,7 +91,7 @@ export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
                     {/* Relative time */}
                     <span
                       className={cn(
-                        "text-xs tabular-nums",
+                        "text-[11px] tabular-nums",
                         urgency === "critical"
                           ? "text-destructive font-medium"
                           : "text-muted-foreground"
@@ -105,7 +105,7 @@ export function UpcomingDeadlines({ deadlines = [] }: UpcomingDeadlinesProps) {
             })}
           </ul>
         ) : (
-          <div className="py-4 text-center">
+          <div className="py-6 text-center">
             <p className="text-xs text-muted-foreground">
               No upcoming task deadlines.
             </p>

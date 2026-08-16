@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { SegmentedTabs } from "@/components/ui/segmented-tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,55 +99,19 @@ export function TaskFilterBar({
         </div>
 
         {/* View Switcher: List, Board, Project */}
-        <div className="flex items-center gap-1 self-end sm:self-auto bg-muted/40 p-0.5 rounded-lg border border-border/50">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onFilterChange({ viewMode: "list" })}
-            className={cn(
-              "h-7 px-2.5 text-xs font-medium gap-1.5 transition-all",
-              filters.viewMode === "list"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <LayoutList className="size-3.5" />
-            <span className="hidden xs:inline">List</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onFilterChange({ viewMode: "board" })}
-            className={cn(
-              "h-7 px-2.5 text-xs font-medium gap-1.5 transition-all",
-              filters.viewMode === "board"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Kanban className="size-3.5" />
-            <span className="hidden xs:inline">Board</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onFilterChange({ viewMode: "project" })}
-            className={cn(
-              "h-7 px-2.5 text-xs font-medium gap-1.5 transition-all",
-              filters.viewMode === "project"
-                ? "bg-background text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <FolderKanban className="size-3.5" />
-            <span className="hidden xs:inline">By Project</span>
-          </Button>
-        </div>
+        <SegmentedTabs
+          size="sm"
+          value={filters.viewMode}
+          onValueChange={(mode) =>
+            onFilterChange({ viewMode: mode as "list" | "board" | "project" })
+          }
+          options={[
+            { id: "list", label: "List", icon: LayoutList },
+            { id: "board", label: "Board", icon: Kanban },
+            { id: "project", label: "By Project", icon: FolderKanban },
+          ]}
+          aria-label="Task view mode"
+        />
       </div>
 
       {/* Bottom row: Filter chips and dropdowns */}

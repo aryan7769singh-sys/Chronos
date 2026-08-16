@@ -151,7 +151,7 @@ export function NotificationBell() {
         size="icon"
         aria-label="Notifications"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-slate-400 hover:text-white hover:bg-white/10 relative cursor-pointer"
+        className="text-muted-foreground hover:text-foreground relative cursor-pointer"
       >
         <Bell className="size-4" />
         {unreadCount > 0 && (

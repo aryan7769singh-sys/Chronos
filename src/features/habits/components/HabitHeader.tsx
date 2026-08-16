@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 import { CreateHabitDialog } from "./CreateHabitDialog";
 import { HABIT_CATEGORIES } from "../constants/domain";
 import { cn } from "@/lib/utils";
@@ -22,30 +22,12 @@ export function HabitHeader({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Title and stats pill */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Habits
-            </h1>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-0.5 text-xs font-semibold text-violet-600 dark:text-violet-400 border border-violet-500/20">
-              <CheckCircle2 className="size-3.5" />
-              <span>
-                {completedCount}/{totalCount} Completed Today
-              </span>
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Build consistency with daily tracking, streak counters, and habit momentum.
-          </p>
-        </div>
-
-        {/* Action Button */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <CreateHabitDialog />
-        </div>
-      </div>
+      <PageHeader
+        title="Habits"
+        description="Build consistency with daily tracking, streak counters, and habit momentum."
+        badge={`${completedCount}/${totalCount} Completed Today`}
+        action={<CreateHabitDialog />}
+      />
 
       {/* Category Filter Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">

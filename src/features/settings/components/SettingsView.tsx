@@ -12,9 +12,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Dialog,
   DialogContent,
@@ -124,39 +124,32 @@ export function SettingsView({ initialSettings, user }: SettingsViewProps) {
   return (
     <div className="p-4 md:p-6 max-w-[1400px] mx-auto space-y-6">
       {/* Top Header & Save Status Indicator */}
-      <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-border/50">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <SlidersHorizontal className="size-5 text-violet-500" />
-            <span>Settings &amp; Personalization</span>
-          </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Configure system defaults, focus intervals, calendar layout, audio alerts, and hotkeys.
-          </p>
-        </div>
-
-        {/* Status Indicator */}
-        <div className="flex items-center gap-2">
-          {isPending && (
-            <span className="flex items-center gap-1.5 text-xs text-violet-600 dark:text-violet-400 font-medium animate-pulse">
-              <Loader2 className="size-3.5 animate-spin" />
-              Saving changes...
-            </span>
-          )}
-          {saveStatus === "saved" && !isPending && (
-            <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              <CheckCircle2 className="size-3.5" />
-              Settings saved
-            </span>
-          )}
-          {saveStatus === "error" && !isPending && (
-            <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
-              <AlertCircle className="size-3.5" />
-              {errorMessage ?? "Save failed"}
-            </span>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Settings & Personalization"
+        description="Configure system defaults, focus intervals, calendar layout, audio alerts, and hotkeys."
+        action={
+          <div className="flex items-center gap-2">
+            {isPending && (
+              <span className="flex items-center gap-1.5 text-xs text-primary font-medium animate-pulse">
+                <Loader2 className="size-3.5 animate-spin" />
+                Saving changes...
+              </span>
+            )}
+            {saveStatus === "saved" && !isPending && (
+              <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <CheckCircle2 className="size-3.5" />
+                Settings saved
+              </span>
+            )}
+            {saveStatus === "error" && !isPending && (
+              <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
+                <AlertCircle className="size-3.5" />
+                {errorMessage ?? "Save failed"}
+              </span>
+            )}
+          </div>
+        }
+      />
 
       {/* Main 2-Column Responsive Layout */}
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 items-start">

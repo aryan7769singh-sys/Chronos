@@ -1,7 +1,7 @@
 "use client";
 
-import { Flame } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Flame, Sparkles } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { MOCK_STREAK, MOCK_RECOMMENDATION } from "../constants/mockData";
 
 function getGreeting(): string {
@@ -15,31 +15,29 @@ export function WelcomeHero() {
   const greeting = getGreeting();
 
   return (
-    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary/8 via-background to-background ring-1 ring-foreground/10">
-      <CardHeader className="pb-2">
+    <Card className="relative overflow-hidden border border-border/60 bg-card/60 backdrop-blur-xs shadow-xs">
+      <CardContent className="p-4 sm:p-5 space-y-3.5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {greeting} 👋
             </h1>
-            <p className="text-sm text-muted-foreground">
-              Here&apos;s what&apos;s on your plate today.
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Here&apos;s an overview of your productivity operating system today.
             </p>
           </div>
 
           {/* Streak badge */}
-          <div className="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20 shrink-0">
+          <div className="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
             <Flame className="size-4" strokeWidth={2} />
-            <span className="text-sm font-semibold">{MOCK_STREAK}-day streak</span>
+            <span className="text-xs sm:text-sm font-semibold">{MOCK_STREAK}-day streak</span>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent>
-        <div className="flex items-start gap-2 rounded-lg bg-muted/50 px-3 py-2.5">
-          <span className="text-base shrink-0" aria-hidden>💡</span>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            <span className="font-medium text-foreground">Today&apos;s insight: </span>
+        <div className="flex items-start gap-2.5 rounded-xl bg-muted/40 p-3 border border-border/40 text-xs">
+          <Sparkles className="size-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-muted-foreground leading-relaxed">
+            <span className="font-semibold text-foreground">Today&apos;s insight: </span>
             {MOCK_RECOMMENDATION}
           </p>
         </div>

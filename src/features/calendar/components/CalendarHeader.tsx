@@ -2,10 +2,10 @@
 
 import { ChevronLeft, ChevronRight, Plus, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SegmentedTabs } from "@/components/ui/segmented-tabs";
 import type { CalendarViewMode } from "../types";
 import { CALENDAR_VIEW_MODES } from "../constants/calendar";
 import { formatNavigationTitle } from "../utils/dateGrid";
-import { cn } from "@/lib/utils";
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -31,8 +31,8 @@ export function CalendarHeader({
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-border/50">
       {/* Left: Date Navigation & Title */}
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-bold tracking-tight text-foreground min-w-44">
+      <div className="flex items-center gap-3 flex-wrap">
+        <h1 className="text-xl font-bold tracking-tight text-foreground min-w-44 truncate">
           {title}
         </h1>
 
@@ -53,7 +53,7 @@ export function CalendarHeader({
             variant="ghost"
             size="sm"
             onClick={onToday}
-            className="h-7 px-2 text-xs font-medium text-foreground hover:bg-background/80"
+            className="h-7 px-2.5 text-xs font-medium text-foreground hover:bg-background/80"
           >
             Today
           </Button>
@@ -73,28 +73,17 @@ export function CalendarHeader({
 
       {/* Right: View Switcher, + New Time Block & + New Event */}
       <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end flex-wrap">
-        {/* View Mode Toggle Pill */}
-        <div className="flex items-center bg-muted/40 p-0.5 rounded-lg border border-border/60">
-          {CALENDAR_VIEW_MODES.map((item) => {
-            const isActive = viewMode === item.mode;
-            return (
-              <button
-                key={item.mode}
-                id={`cal-view-${item.mode}`}
-                type="button"
-                onClick={() => onViewChange(item.mode)}
-                className={cn(
-                  "px-3 py-1 text-xs font-medium rounded-md transition-all",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* View Mode Segmented Tabs */}
+        <SegmentedTabs
+          size="sm"
+          value={viewMode}
+          onValueChange={(mode) => onViewChange(mode as CalendarViewMode)}
+          options={CALENDAR_VIEW_MODES.map((item) => ({
+            id: item.mode,
+            label: item.label,
+          }))}
+          aria-label="Calendar view mode"
+        />
 
         {/* New Time Block Button */}
         <Button
@@ -102,7 +91,7 @@ export function CalendarHeader({
           size="sm"
           variant="outline"
           onClick={onNewTimeBlock}
-          className="h-8 gap-1.5 text-xs font-semibold border-violet-500/40 text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/60"
+          className="h-8 gap-1.5 text-xs font-semibold shadow-xs"
         >
           <Timer className="size-3.5" />
           <span>Time Block</span>
